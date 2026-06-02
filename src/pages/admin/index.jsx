@@ -245,8 +245,19 @@ export function AdminDisputes() {
 
 // ── ADS & PARTNERSHIPS ──────────────────────────────────────────
 export function AdminAds() {
+  const [toast, setToast] = useState('')
+
+  function showToast(msg) {
+    setToast(msg)
+    setTimeout(() => setToast(''), 2500)
+  }
   return (
     <AdminLayout>
+      {toast && (
+        <div className="mb-4 p-3 rounded-xl bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 text-sm text-brand-700 dark:text-brand-300 animate-slide-up">
+          {toast}
+        </div>
+      )}
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Iklan & Partnership</h1>
       <div className="grid md:grid-cols-3 gap-3 mb-6">
         <StatCard label="Revenue Iklan" value="Rp1,5jt" sub="/bulan" icon={DollarSign} color="green" />
@@ -290,7 +301,7 @@ export function AdminAds() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge color={s.status === 'sold' ? 'blue' : 'teal'}>{s.status === 'sold' ? 'Terisi' : 'Tersedia'}</Badge>
-                {s.status === 'available' && <Button size="sm" variant="outline" onClick={() => alert('Fitur assign partner segera hadir!')}>Assign</Button>}
+                {s.status === 'available' && <Button size="sm" variant="outline" onClick={() => showToast('✅ Fitur assign partner akan segera tersedia.')}>Assign</Button>}
               </div>
             </div>
           ))}

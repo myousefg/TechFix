@@ -177,6 +177,7 @@ export function TechnicianDashboard() {
 // ── ORDERS ──────────────────────────────────────────────────────
 export function TechnicianOrders() {
   const [selected, setSelected] = useState(null)
+  const [updateSent, setUpdateSent] = useState(false)
   const [photoPreview, setPhotoPreview] = useState(null)
 
   const mockPhotos = [

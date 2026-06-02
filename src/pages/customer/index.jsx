@@ -653,9 +653,8 @@ export function CustomerSettings() {
             { icon: Bell,       label: 'Notifikasi',        path: '/customer/notif-settings' },
             { icon: Settings,   label: 'Pengaturan Akun',   path: '/customer/account' },
           ].map((item, i, arr) => (
-            <button key={item.label} onClick={() => item.path !== '#' && navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-5 py-3.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${i < arr.length-1 ? 'border-b border-gray-100 dark:border-gray-800' : ''}`}
-            onClick={() => navigate(item.path)}>
+            <button key={item.label} onClick={() => navigate(item.path)}
+              className={`w-full flex items-center gap-3 px-5 py-3.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${i < arr.length-1 ? 'border-b border-gray-100 dark:border-gray-800' : ''}`}>
               <item.icon size={16} className="text-gray-400" />
               <span className="flex-1 text-left">{item.label}</span>
               <ChevronRight size={14} className="text-gray-300" />

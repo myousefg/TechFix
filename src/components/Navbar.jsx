@@ -6,6 +6,7 @@ import { useTheme } from '../ThemeContext'
 const portals = [
   { label: 'Pelanggan', path: '/customer',   color: 'text-brand-500', bg: 'bg-brand-50 dark:bg-brand-900/30',   desc: 'Cari & pesan teknisi' },
   { label: 'Teknisi',   path: '/technician', color: 'text-teal-500',  bg: 'bg-teal-50 dark:bg-teal-900/30',    desc: 'Kelola order & penghasilan' },
+  { label: 'Bisnis',    path: '/business',   color: 'text-purple-500',bg: 'bg-purple-50 dark:bg-purple-900/30', desc: 'IT support untuk UMKM' },
   { label: 'Admin',     path: '/admin',      color: 'text-orange-500',bg: 'bg-orange-50 dark:bg-orange-900/30', desc: 'Dashboard platform' },
 ]
 

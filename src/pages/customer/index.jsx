@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Search, Filter, MapPin, Clock, Shield, Star, ArrowLeft, CheckCircle, Upload, CreditCard, Smartphone, Building, ChevronRight, Bell, History, Settings, LogOut, Package, RefreshCw } from 'lucide-react'
 import { Card, Badge, StarRating, TechnicianCard, Button, Input, EscrowStatus, StatCard, SidebarLink } from '../../components/UI'
 import { technicians, orders, services, maintenancePlans } from '../../data'
+import { getSubscription, saveSubscription } from '../../store'
 
 function CustomerLayout({ children, activeTab }) {
   const navigate = useNavigate()
@@ -109,7 +110,7 @@ export function CustomerHome() {
             <p className="text-sm text-gray-500 dark:text-gray-400">Halo, Hashfi 👋</p>
             <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white">Butuh servis apa?</h1>
           </div>
-          <button onClick={() => navigate('/customer/orders')} className="relative p-2 rounded-xl text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800">
+          <button onClick={() => navigate('/customer/notifications')} className="relative p-2 rounded-xl text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800">
             <Bell size={20} />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
           </button>
@@ -414,7 +415,15 @@ export function CustomerOrders() {
 // ── SUBSCRIPTION ────────────────────────────────────────────────
 export function CustomerSubscription() {
   const navigate = useNavigate()
-  const [selected, setSelected] = useState('premium')
+  const existing = getSubscription()
+  const [selected, setSelected] = useState(existing?.id || 'premium')
+  const [subscribed, setSubscribed] = useState(!!existing)
+
+  function handleSubscribe() {
+    const plan = maintenancePlans.find(p => p.id === selected)
+    saveSubscription(plan)
+    setSubscribed(true)
+  }
   return (
     <CustomerLayout activeTab="sub">
       <div className="py-6">
@@ -449,9 +458,10 @@ export function CustomerSubscription() {
             </div>
           ))}
         </div>
-        <Button className="w-full mt-6" size="lg" onClick={() => navigate('/customer/booking/1')}>
-          Mulai Langganan {maintenancePlans.find(p=>p.id===selected)?.name}
+        <Button className="w-full mt-6" size="lg" onClick={handleSubscribe}>
+          {subscribed ? `✅ Aktif – Paket ${maintenancePlans.find(p=>p.id===selected)?.name}` : `Mulai Langganan ${maintenancePlans.find(p=>p.id===selected)?.name}`}
         </Button>
+        {subscribed && <p className="text-center text-xs text-green-600 dark:text-green-400 mt-2">Langganan tersimpan di perangkat ini</p>}
       </div>
     </CustomerLayout>
   )
@@ -478,12 +488,13 @@ export function CustomerSettings() {
           {[
             { icon: History, label: 'Riwayat Servis', path: '/customer/orders' },
             { icon: RefreshCw, label: 'Kelola Langganan', path: '/customer/subscription' },
-            { icon: CreditCard, label: 'Metode Pembayaran', path: '#' },
-            { icon: Bell, label: 'Notifikasi', path: '#' },
-            { icon: Settings, label: 'Pengaturan Akun', path: '#' },
+            { icon: CreditCard, label: 'Metode Pembayaran', path: '/customer/payment-methods' },
+            { icon: Bell, label: 'Notifikasi', path: '/customer/notif-settings' },
+            { icon: Settings, label: 'Pengaturan Akun', path: '/customer/account' },
           ].map((item, i, arr) => (
             <button key={item.label} onClick={() => item.path !== '#' && navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-5 py-3.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${i < arr.length-1 ? 'border-b border-gray-100 dark:border-gray-800' : ''}`}>
+              className={`w-full flex items-center gap-3 px-5 py-3.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${i < arr.length-1 ? 'border-b border-gray-100 dark:border-gray-800' : ''}`}
+            onClick={() => navigate(item.path)}>
               <item.icon size={16} className="text-gray-400" />
               <span className="flex-1 text-left">{item.label}</span>
               <ChevronRight size={14} className="text-gray-300" />

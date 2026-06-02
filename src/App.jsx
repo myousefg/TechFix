@@ -10,6 +10,10 @@ import {
   CustomerRegister, CustomerHome, TechnicianProfile,
   Booking, CustomerOrders, CustomerSubscription, CustomerSettings
 } from './pages/customer'
+import PaymentMethods from './pages/customer/PaymentMethods'
+import Notifications   from './pages/customer/Notifications'
+import NotifSettings   from './pages/customer/NotifSettings'
+import AccountSettings from './pages/customer/AccountSettings'
 
 // Technician
 import {
@@ -18,9 +22,8 @@ import {
 } from './pages/technician'
 
 // Admin
-import {
-  AdminDashboard, AdminUsers, AdminDisputes, AdminAds
-} from './pages/admin'
+import { AdminDashboard, AdminUsers, AdminDisputes, AdminAds } from './pages/admin'
+import AdminTransactions from './pages/admin/Transactions'
 
 export default function App() {
   return (
@@ -41,6 +44,10 @@ export default function App() {
           <Route path="/customer/orders"             element={<CustomerOrders />} />
           <Route path="/customer/subscription"       element={<CustomerSubscription />} />
           <Route path="/customer/settings"           element={<CustomerSettings />} />
+          <Route path="/customer/payment-methods"    element={<PaymentMethods />} />
+          <Route path="/customer/notifications"      element={<Notifications />} />
+          <Route path="/customer/notif-settings"     element={<NotifSettings />} />
+          <Route path="/customer/account"            element={<AccountSettings />} />
 
           {/* Technician */}
           <Route path="/technician/register"  element={<TechnicianRegister />} />
@@ -52,7 +59,7 @@ export default function App() {
           {/* Admin */}
           <Route path="/admin"              element={<AdminDashboard />} />
           <Route path="/admin/users"        element={<AdminUsers />} />
-          <Route path="/admin/transactions" element={<AdminDashboard />} />
+          <Route path="/admin/transactions" element={<AdminTransactions />} />
           <Route path="/admin/disputes"     element={<AdminDisputes />} />
           <Route path="/admin/ads"          element={<AdminAds />} />
         </Routes>

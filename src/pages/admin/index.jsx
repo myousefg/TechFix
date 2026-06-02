@@ -289,7 +289,7 @@ export function AdminAds() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge color={s.status === 'sold' ? 'blue' : 'teal'}>{s.status === 'sold' ? 'Terisi' : 'Tersedia'}</Badge>
-                {s.status === 'available' && <Button size="sm" variant="outline">Assign</Button>}
+                {s.status === 'available' && <Button size="sm" variant="outline" onClick={() => alert('Fitur assign partner segera hadir!')}>Assign</Button>}
               </div>
             </div>
           ))}

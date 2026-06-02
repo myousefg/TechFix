@@ -177,7 +177,13 @@ export function TechnicianDashboard() {
 // ── ORDERS ──────────────────────────────────────────────────────
 export function TechnicianOrders() {
   const [selected, setSelected] = useState(null)
-  const [updateSent, setUpdateSent] = useState(false)
+  const [photoPreview, setPhotoPreview] = useState(null)
+
+  const mockPhotos = [
+    { label: 'Diagnosa awal', src: '🔧', desc: 'Membuka casing laptop' },
+    { label: 'Proses perbaikan', src: '⚙️', desc: 'Penggantian thermal paste' },
+    { label: 'Hasil akhir', src: '✅', desc: 'Laptop bersih & siap' },
+  ]
 
   if (selected) {
     const o = orders.find(x => x.id === selected)
@@ -215,10 +221,29 @@ export function TechnicianOrders() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Foto progres</label>
-                  <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center cursor-pointer hover:border-teal-400 transition-colors">
-                    <Camera size={18} className="mx-auto text-gray-400 mb-1" />
-                    <p className="text-xs text-gray-400">Upload foto</p>
-                  </div>
+                  {!photoPreview ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {mockPhotos.map((p, i) => (
+                        <button key={i} onClick={() => setPhotoPreview(p)}
+                          className="aspect-square rounded-xl bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-brand-400 dark:hover:border-brand-600 flex flex-col items-center justify-center transition-colors group">
+                          <span className="text-2xl mb-1">{p.src}</span>
+                          <span className="text-xs text-gray-400 group-hover:text-brand-500 text-center px-1 leading-tight">{p.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 animate-scale-in">
+                      <div className="bg-gray-900 p-6 text-center">
+                        <span className="text-5xl">{photoPreview.src}</span>
+                        <p className="text-white text-sm mt-2 font-medium">{photoPreview.label}</p>
+                        <p className="text-gray-400 text-xs mt-1">{photoPreview.desc}</p>
+                      </div>
+                      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-800">
+                        <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1"><CheckCircle size={11} />Foto dipilih</span>
+                        <button onClick={() => setPhotoPreview(null)} className="text-xs text-gray-400 hover:text-gray-600">Ganti</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <Button variant="teal" className="w-full mt-4" onClick={() => setUpdateSent(true)}>Kirim Update</Button>

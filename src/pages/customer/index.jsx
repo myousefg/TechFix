@@ -98,14 +98,40 @@ export function CustomerHome() {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('Semua')
+  const [viewMode, setViewMode] = useState('list') // 'list' | 'map'
+  const [aiMatching, setAiMatching] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+
   const filters = ['Semua', 'Terdekat', 'Rating Tertinggi', 'Harga Terendah', 'Terverifikasi']
-  const filtered = technicians.filter(t =>
-    query === '' || t.name.toLowerCase().includes(query.toLowerCase()) || t.specialty.toLowerCase().includes(query.toLowerCase())
-  )
+
+  // AI match scores (mock)
+  const aiScores = { 1: 98, 2: 94, 3: 87, 4: 82, 5: 76, 6: 71 }
+
+  const filtered = technicians
+    .filter(t => query === '' || t.name.toLowerCase().includes(query.toLowerCase()) || t.specialty.toLowerCase().includes(query.toLowerCase()))
+    .sort((a, b) => aiMatching ? (aiScores[b.id] || 0) - (aiScores[a.id] || 0) : 0)
+
+  function toggleAI() {
+    if (aiMatching) { setAiMatching(false); return }
+    setAiLoading(true)
+    setTimeout(() => { setAiLoading(false); setAiMatching(true) }, 1200)
+  }
+
+  // Mock map pins
+  const pins = [
+    { id: 1, name: 'Budi S.',  x: 55, y: 38, rating: 4.9 },
+    { id: 2, name: 'Rina K.',  x: 30, y: 55, rating: 4.8 },
+    { id: 3, name: 'Agus P.',  x: 70, y: 62, rating: 4.7 },
+    { id: 4, name: 'Dewi L.',  x: 45, y: 72, rating: 4.9 },
+    { id: 5, name: 'Hendra W.',x: 22, y: 35, rating: 4.6 },
+    { id: 6, name: 'Sari A.',  x: 78, y: 45, rating: 4.8 },
+  ]
+
   return (
     <CustomerLayout activeTab="home">
       <div className="py-6">
-        <div className="flex items-center justify-between mb-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Halo, Hashfi 👋</p>
             <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white">Butuh servis apa?</h1>
@@ -117,41 +143,144 @@ export function CustomerHome() {
         </div>
 
         {/* Search */}
-        <div className="relative mb-4">
+        <div className="relative mb-3">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input value={query} onChange={e => setQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-gray-900 dark:text-white placeholder-gray-400"
             placeholder="Cari teknisi atau layanan..." />
         </div>
 
+        {/* AI matching banner */}
+        <button onClick={toggleAI}
+          className={`w-full flex items-center gap-3 p-3 rounded-xl border mb-4 transition-all text-left ${aiMatching ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-300 dark:border-brand-700' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-brand-300'}`}>
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${aiMatching ? 'bg-brand-500' : 'bg-gray-100 dark:bg-gray-800'}`}>
+            {aiLoading
+              ? <div className="w-4 h-4 rounded-full border-2 border-brand-300 border-t-brand-600 animate-spin" />
+              : <span className="text-sm">{aiMatching ? '✨' : '🤖'}</span>
+            }
+          </div>
+          <div className="flex-1">
+            <p className={`text-sm font-medium ${aiMatching ? 'text-brand-600 dark:text-brand-400' : 'text-gray-700 dark:text-gray-300'}`}>
+              {aiLoading ? 'AI sedang menganalisis kebutuhanmu...' : aiMatching ? 'AI Smart Matching aktif' : 'Aktifkan AI Smart Matching'}
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {aiMatching ? 'Teknisi diurutkan berdasarkan kecocokan terbaik untukmu' : 'AI akan pilihkan teknisi paling cocok secara otomatis'}
+            </p>
+          </div>
+          <div className={`w-10 h-5 rounded-full transition-colors flex-shrink-0 ${aiMatching ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+            <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform mt-0.5 ${aiMatching ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </div>
+        </button>
+
         {/* Service categories */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-2 mb-5">
           {services.slice(0,6).map(s => (
             <button key={s.id} onClick={() => setQuery(s.label)}
-              className="p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-brand-300 dark:hover:border-brand-700 text-center transition-all">
+              className={`p-3 rounded-xl border text-center transition-all ${query === s.label ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-400' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-brand-300 dark:hover:border-brand-700'}`}>
               <div className="text-xl mb-1">{s.icon}</div>
               <p className="text-xs font-medium text-gray-700 dark:text-gray-300 leading-tight">{s.label}</p>
             </button>
           ))}
         </div>
 
-        {/* Filter chips */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
-          {filters.map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === f ? 'bg-brand-500 text-white' : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'}`}>
-              {f}
+        {/* Filter + view toggle row */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex gap-2 overflow-x-auto scrollbar-none flex-1">
+            {filters.map(f => (
+              <button key={f} onClick={() => setFilter(f)}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === f ? 'bg-brand-500 text-white' : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'}`}>
+                {f}
+              </button>
+            ))}
+          </div>
+          {/* Map/list toggle */}
+          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5 flex-shrink-0">
+            <button onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-md text-xs transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+              ☰
             </button>
-          ))}
+            <button onClick={() => setViewMode('map')}
+              className={`p-1.5 rounded-md text-xs transition-colors ${viewMode === 'map' ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+              🗺
+            </button>
+          </div>
         </div>
 
-        {/* Results */}
-        <div className="space-y-3">
-          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{filtered.length} teknisi ditemukan</p>
-          {filtered.map(t => (
-            <TechnicianCard key={t.id} {...t} onClick={() => navigate(`/customer/technician/${t.id}`)} />
-          ))}
-        </div>
+        {/* MAP VIEW */}
+        {viewMode === 'map' && (
+          <div className="mb-4 animate-scale-in">
+            <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-gray-200 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              {/* Fake map background */}
+              <div className="absolute inset-0" style={{
+                background: 'linear-gradient(135deg, #1a2035 0%, #1e2d40 50%, #1a2035 100%)',
+                backgroundImage: `
+                  repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 40px),
+                  repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 40px)
+                `
+              }} />
+              {/* Roads */}
+              <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0,50 Q25,45 50,50 T100,48" stroke="#60a5fa" strokeWidth="0.8" fill="none"/>
+                <path d="M30,0 Q35,30 32,50 T30,100" stroke="#60a5fa" strokeWidth="0.6" fill="none"/>
+                <path d="M0,25 L100,30" stroke="#60a5fa" strokeWidth="0.4" fill="none"/>
+                <path d="M0,75 L100,72" stroke="#60a5fa" strokeWidth="0.4" fill="none"/>
+                <path d="M70,0 L68,100" stroke="#60a5fa" strokeWidth="0.5" fill="none"/>
+              </svg>
+              {/* "You are here" pin */}
+              <div className="absolute" style={{ left: '50%', top: '50%', transform: 'translate(-50%,-50%)' }}>
+                <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-lg">
+                  <div className="w-4 h-4 rounded-full bg-blue-400 animate-ping-slow absolute inset-0" />
+                </div>
+              </div>
+              {/* Technician pins */}
+              {pins.map(pin => (
+                <button key={pin.id} onClick={() => navigate(`/customer/technician/${pin.id}`)}
+                  className="absolute group"
+                  style={{ left: `${pin.x}%`, top: `${pin.y}%`, transform: 'translate(-50%,-100%)' }}>
+                  <div className="relative">
+                    <div className="bg-brand-500 text-white text-xs rounded-full px-2 py-0.5 font-medium shadow-lg whitespace-nowrap group-hover:bg-brand-400 transition-colors">
+                      ⭐ {pin.rating}
+                    </div>
+                    <div className="w-2 h-2 bg-brand-500 rotate-45 mx-auto -mt-0.5 group-hover:bg-brand-400 transition-colors" />
+                  </div>
+                </button>
+              ))}
+              {/* Legend */}
+              <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2">
+                <div className="flex items-center gap-2 text-xs text-white">
+                  <div className="w-3 h-3 rounded-full bg-blue-500" /> Lokasi kamu
+                </div>
+                <div className="flex items-center gap-2 text-xs text-white mt-1">
+                  <div className="w-3 h-2 rounded-sm bg-brand-500" /> Teknisi terdekat
+                </div>
+              </div>
+              <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 text-xs text-white">
+                Coblong, Bandung
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 text-center mt-2">Tap pin untuk lihat profil teknisi · {pins.length} teknisi dalam radius 5km</p>
+          </div>
+        )}
+
+        {/* LIST VIEW */}
+        {viewMode === 'list' && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{filtered.length} teknisi ditemukan</p>
+              {aiMatching && <p className="text-xs text-brand-500 font-medium">✨ Diurutkan AI</p>}
+            </div>
+            {filtered.map(t => (
+              <div key={t.id} className="relative">
+                {aiMatching && (
+                  <div className="absolute -top-1 -right-1 z-10 bg-brand-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
+                    {aiScores[t.id]}% match
+                  </div>
+                )}
+                <TechnicianCard {...t} onClick={() => navigate(`/customer/technician/${t.id}`)} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </CustomerLayout>
   )
@@ -273,12 +402,31 @@ export function Booking() {
               <Input label="Merek & Model Perangkat" placeholder="Contoh: ASUS ROG Zephyrus G14" />
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Deskripsi Masalah</label>
-                <textarea className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-gray-900 dark:text-white" rows={4} placeholder="Ceritakan detail masalah perangkat kamu..." />
+                <textarea className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-gray-900 dark:text-white resize-none" rows={3} placeholder="Ceritakan detail masalah perangkat kamu..." />
+              </div>
+              {/* Pickup/Delivery option */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipe Servis</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 'dropoff', icon: '🏪', label: 'Antar Sendiri', sub: 'Antar ke lokasi teknisi', extra: 'Gratis' },
+                    { id: 'pickup',  icon: '🚗', label: 'Pickup & Delivery', sub: 'Teknisi jemput & antar', extra: '+Rp30.000' },
+                  ].map(opt => (
+                    <label key={opt.id}
+                      className="flex flex-col p-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 cursor-pointer hover:border-brand-400 dark:hover:border-brand-600 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-900/20">
+                      <input type="radio" name="servicetype" value={opt.id} defaultChecked={opt.id === 'dropoff'} className="sr-only" />
+                      <span className="text-xl mb-1">{opt.icon}</span>
+                      <span className="text-xs font-semibold text-gray-900 dark:text-white">{opt.label}</span>
+                      <span className="text-xs text-gray-400 mt-0.5">{opt.sub}</span>
+                      <span className={`text-xs font-medium mt-1 ${opt.id === 'dropoff' ? 'text-green-600' : 'text-brand-500'}`}>{opt.extra}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Foto Perangkat (opsional)</label>
-                <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center cursor-pointer hover:border-brand-300 dark:hover:border-brand-600 transition-colors">
-                  <Upload size={20} className="mx-auto text-gray-400 mb-2" />
+                <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-5 text-center cursor-pointer hover:border-brand-300 dark:hover:border-brand-600 transition-colors">
+                  <Upload size={18} className="mx-auto text-gray-400 mb-1.5" />
                   <p className="text-sm text-gray-400">Tap untuk upload foto</p>
                 </div>
               </div>
@@ -380,7 +528,19 @@ export function CustomerOrders() {
             </div>
           </Card>
           {o.escrow === 'progress' && (
-            <Button className="w-full" variant="teal" onClick={() => setSelected(null)}>✅ Konfirmasi Servis Selesai</Button>
+            <div className="space-y-2">
+              <Button className="w-full" variant="teal" onClick={() => setSelected(null)}>✅ Konfirmasi Servis Selesai</Button>
+              <button onClick={() => navigate(`/customer/dispute/${o.id}`)}
+                className="w-full py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors border border-red-200 dark:border-red-900">
+                ⚠️ Ada masalah? Ajukan sengketa
+              </button>
+            </div>
+          )}
+          {o.escrow === 'waiting' && (
+            <button onClick={() => navigate(`/customer/dispute/${o.id}`)}
+              className="w-full py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors border border-red-200 dark:border-red-900">
+              ⚠️ Laporkan masalah
+            </button>
           )}
         </div>
       </CustomerLayout>
@@ -486,11 +646,12 @@ export function CustomerSettings() {
         </Card>
         <Card className="overflow-hidden mb-4">
           {[
-            { icon: History, label: 'Riwayat Servis', path: '/customer/orders' },
-            { icon: RefreshCw, label: 'Kelola Langganan', path: '/customer/subscription' },
+            { icon: History,    label: 'Riwayat Servis',    path: '/customer/orders' },
+            { icon: RefreshCw,  label: 'Kelola Langganan',  path: '/customer/subscription' },
+            { icon: Star,       label: 'Poin & Reward',     path: '/customer/loyalty' },
             { icon: CreditCard, label: 'Metode Pembayaran', path: '/customer/payment-methods' },
-            { icon: Bell, label: 'Notifikasi', path: '/customer/notif-settings' },
-            { icon: Settings, label: 'Pengaturan Akun', path: '/customer/account' },
+            { icon: Bell,       label: 'Notifikasi',        path: '/customer/notif-settings' },
+            { icon: Settings,   label: 'Pengaturan Akun',   path: '/customer/account' },
           ].map((item, i, arr) => (
             <button key={item.label} onClick={() => item.path !== '#' && navigate(item.path)}
               className={`w-full flex items-center gap-3 px-5 py-3.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${i < arr.length-1 ? 'border-b border-gray-100 dark:border-gray-800' : ''}`}

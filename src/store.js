@@ -89,3 +89,36 @@ export function getAdminTransactions() {
     { id: 'TF-006', customer: 'Siti M.',     tech: 'Budi S.',   service: 'Servis Laptop Layar', amount: 200000, status: 'done',     date: '15 Mei 2025' },
   ])
 }
+
+// ── Loyalty points ─────────────────────────────────────────────
+export function getLoyaltyPoints() {
+  return load('loyalty_points', { points: 350, history: [
+    { id: 1, desc: 'Order TF-001 selesai',        pts: +100, date: '28 Mei 2025' },
+    { id: 2, desc: 'Order TF-002 selesai',         pts: +80,  date: '2 Jun 2025'  },
+    { id: 3, desc: 'Referral – Andi Rachman',      pts: +100, date: '1 Jun 2025'  },
+    { id: 4, desc: 'Redeem voucher Rp20.000',      pts: -50,  date: '30 Mei 2025' },
+    { id: 5, desc: 'Bonus pendaftaran',             pts: +120, date: '27 Mei 2025' },
+  ]})
+}
+export function saveLoyaltyPoints(data) { save('loyalty_points', data) }
+
+// ── Disputes (customer-side) ───────────────────────────────────
+export function getCustomerDisputes() {
+  return load('customer_disputes', [])
+}
+export function addCustomerDispute(dispute) {
+  const existing = getCustomerDisputes()
+  save('customer_disputes', [...existing, dispute])
+}
+
+// ── KYC queue (admin) ──────────────────────────────────────────
+export function getKYCQueue() {
+  return load('kyc_queue', [
+    { id: 'K-001', name: 'Dani Prasetyo',    specialty: 'Servis Laptop',      submitted: '1 Jun 2025',  status: 'pending', nik: '3273xxxxxxxxxx01' },
+    { id: 'K-002', name: 'Fitri Handayani',  specialty: 'Recovery Data',       submitted: '2 Jun 2025',  status: 'pending', nik: '3273xxxxxxxxxx02' },
+    { id: 'K-003', name: 'Galih Nugroho',    specialty: 'Rakit PC & Upgrade',  submitted: '3 Jun 2025',  status: 'pending', nik: '3273xxxxxxxxxx03' },
+    { id: 'K-004', name: 'Hani Pratiwi',     specialty: 'Jaringan & IT',       submitted: '4 Jun 2025',  status: 'pending', nik: '3273xxxxxxxxxx04' },
+    { id: 'K-005', name: 'Irfan Maulana',    specialty: 'Thermal Repaste',     submitted: '5 Jun 2025',  status: 'pending', nik: '3273xxxxxxxxxx05' },
+  ])
+}
+export function saveKYCQueue(queue) { save('kyc_queue', queue) }

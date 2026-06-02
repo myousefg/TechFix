@@ -10,11 +10,12 @@ function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const links = [
-    { icon: BarChart2, label: 'Dashboard',        path: '/admin' },
-    { icon: Users,     label: 'Manajemen User',   path: '/admin/users' },
-    { icon: Package,   label: 'Transaksi',         path: '/admin/transactions' },
-    { icon: AlertTriangle, label: 'Arbitrase',     path: '/admin/disputes' },
-    { icon: Megaphone, label: 'Iklan & Partnership',path: '/admin/ads' },
+    { icon: BarChart2,     label: 'Dashboard',         path: '/admin' },
+    { icon: Users,         label: 'Manajemen User',    path: '/admin/users' },
+    { icon: Package,       label: 'Transaksi',          path: '/admin/transactions' },
+    { icon: Shield,        label: 'Verifikasi KYC',    path: '/admin/kyc' },
+    { icon: AlertTriangle, label: 'Arbitrase',          path: '/admin/disputes' },
+    { icon: Megaphone,     label: 'Iklan & Partnership',path: '/admin/ads' },
   ]
 
   return (
@@ -93,11 +94,11 @@ export function AdminDashboard() {
         <Card className="p-5">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Peringatan</h3>
           <div className="space-y-3">
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-orange-50 dark:bg-orange-900/20">
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors" onClick={() => navigate('/admin/kyc')}>
               <AlertTriangle size={16} className="text-orange-500 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-orange-800 dark:text-orange-300">{adminStats.pendingKYC} teknisi menunggu KYC</p>
-                <p className="text-xs text-orange-600 dark:text-orange-400">Perlu ditinjau dalam 24 jam</p>
+                <p className="text-xs text-orange-600 dark:text-orange-400">Tap untuk review sekarang →</p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 rounded-xl bg-red-50 dark:bg-red-900/20">

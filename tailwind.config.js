@@ -2,6 +2,9 @@ export default {
   darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
+    screens: {
+      xs: '390px',
+    },
     extend: {
       fontFamily: {
         sans: ['"DM Sans"', 'sans-serif'],

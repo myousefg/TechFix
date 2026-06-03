@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Home, Package, TrendingUp, Star, Settings, LogOut, CheckCircle, Clock, ChevronRight, ArrowLeft, Upload, Camera, DollarSign, Users, Award } from 'lucide-react'
-import { Card, Badge, Button, Input, EscrowStatus, StatCard } from '../../components/UI'
-import { orders } from '../../data'
+import toast from 'react-hot-toast'
+import { Home, Package, TrendingUp, Star, Settings, LogOut, CheckCircle, ChevronRight, ArrowLeft, Upload, Camera, DollarSign, Clock } from 'lucide-react'
+import { Card, Badge, Button, Input, EscrowStatus, StatCard, EmptyState } from '../../components/UI'
+import { TechnicianOrderDetail } from '../../components/TechnicianOrderDetail'
+import { getOrders, updateOrder, saveSession, loadSession, removeSession, getTechnicianProfile, saveTechnicianProfile, getCurrentTechnicianId, getCurrentTechnician, getOrdersByTechId, getTechnicianEarnings, getKYCRequests } from '../../store'
+import { WithdrawModal, UpgradePremiumModal } from '../../components/TechnicianModals'
 
 function TechLayout({ children, activeTab }) {
   const navigate = useNavigate()
@@ -15,7 +18,7 @@ function TechLayout({ children, activeTab }) {
   return (
     <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="max-w-2xl mx-auto px-4 pb-24">{children}</div>
-      <nav className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-40">
+      <nav className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-40 pb-[env(safe-area-inset-bottom)]">
         <div className="max-w-2xl mx-auto flex">
           {tabs.map(t => (
             <button key={t.id} onClick={() => navigate(t.path)}
@@ -33,24 +36,52 @@ function TechLayout({ children, activeTab }) {
 // ── REGISTER ────────────────────────────────────────────────────
 export function TechnicianRegister() {
   const navigate = useNavigate()
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(loadSession('tech_reg_step', 1))
+  const [form, setForm] = useState(loadSession('tech_reg_form', { name: '', email: '', phone: '', password: '', specialties: [], otherSpecialty: '', ktp: '' }))
+
+  function update(key, value) {
+    const next = { ...form, [key]: value }
+    setForm(next)
+    saveSession('tech_reg_form', next)
+  }
+  function toggleSpecialty(s) {
+    const next = form.specialties.includes(s) ? form.specialties.filter(x => x !== s) : [...form.specialties, s]
+    update('specialties', next)
+  }
+  function goToStep(n) {
+    setStep(n)
+    saveSession('tech_reg_step', n)
+  }
+  function handleSubmitKYC() {
+    saveTechnicianProfile({ name: form.name, kycStatus: 'pending' })
+    goToStep(4)
+  }
+  function handleFinish() {
+    removeSession('tech_reg_step')
+    removeSession('tech_reg_form')
+    navigate('/technician')
+  }
   return (
-    <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4">
       <Card className="w-full max-w-md p-8">
         <div className="flex gap-2 mb-8">
           {[1,2,3,4].map(i => <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= step ? 'bg-accent-500' : 'bg-gray-200 dark:bg-gray-700'}`} />)}
         </div>
         {step === 1 && (
           <>
+            <button onClick={() => navigate('/')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-4">
+              <ArrowLeft size={16} />Kembali
+            </button>
             <h2 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-2">Daftar Teknisi</h2>
             <p className="text-sm text-gray-500 mb-6">Bergabung dengan ratusan teknisi mitra TechFix</p>
             <div className="space-y-4">
-              <Input label="Nama Lengkap" placeholder="Nama lengkap sesuai KTP" />
-              <Input label="Email" type="email" placeholder="email@example.com" />
-              <Input label="No. WhatsApp Aktif" placeholder="+62 812 xxxx xxxx" />
-              <Input label="Password" type="password" placeholder="Minimal 8 karakter" />
+              <Input label="Nama Lengkap" placeholder="Nama lengkap sesuai KTP" value={form.name} onChange={e => update('name', e.target.value)} />
+              <Input label="Email" type="email" placeholder="email@example.com" value={form.email} onChange={e => update('email', e.target.value)} />
+              <Input label="No. WhatsApp Aktif" placeholder="+62 812 xxxx xxxx" value={form.phone} onChange={e => update('phone', e.target.value)} />
+              <Input label="Password" type="password" placeholder="Minimal 8 karakter" value={form.password} onChange={e => update('password', e.target.value)} />
             </div>
-            <Button variant="teal" className="w-full mt-6" onClick={() => setStep(2)}>Lanjut</Button>
+            <Button variant="teal" className="w-full mt-6" onClick={() => goToStep(2)}>Lanjut</Button>
+            <p className="text-center text-sm text-gray-500 mt-4">Sudah punya akun? <button onClick={() => navigate('/technician')} className="text-teal-500 font-medium">Masuk</button></p>
           </>
         )}
         {step === 2 && (
@@ -60,15 +91,15 @@ export function TechnicianRegister() {
             <div className="space-y-3">
               {['Servis Laptop & PC','Rakit PC Custom','Thermal Repaste','Recovery Data','Jaringan & IT Support','Upgrade Hardware','Konsol Gaming'].map(s => (
                 <label key={s} className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" className="accent-teal-500 w-4 h-4" />
+                  <input type="checkbox" checked={form.specialties.includes(s)} onChange={() => toggleSpecialty(s)} className="accent-teal-500 w-4 h-4" />
                   <span className="text-sm text-gray-700 dark:text-gray-300">{s}</span>
                 </label>
               ))}
-              <Input label="Spesialisasi lain (opsional)" placeholder="Tuliskan keahlian lain..." />
+              <Input label="Spesialisasi lain (opsional)" placeholder="Tuliskan keahlian lain..." value={form.otherSpecialty} onChange={e => update('otherSpecialty', e.target.value)} />
             </div>
             <div className="flex gap-3 mt-6">
-              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>Kembali</Button>
-              <Button variant="teal" className="flex-1" onClick={() => setStep(3)}>Lanjut</Button>
+              <Button variant="outline" className="flex-1" onClick={() => goToStep(1)}>Kembali</Button>
+              <Button variant="teal" className="flex-1" onClick={() => goToStep(3)}>Lanjut</Button>
             </div>
           </>
         )}
@@ -77,7 +108,7 @@ export function TechnicianRegister() {
             <h2 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-2">Verifikasi Identitas (KYC)</h2>
             <p className="text-sm text-gray-500 mb-5">Diperlukan agar pelanggan percaya padamu</p>
             <div className="space-y-4">
-              <Input label="Nomor KTP" placeholder="3273xxxxxxxxxxxxxx" />
+              <Input label="Nomor KTP" placeholder="3273xxxxxxxxxxxxxx" value={form.ktp} onChange={e => update('ktp', e.target.value)} />
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Foto KTP</label>
                 <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-5 text-center cursor-pointer hover:border-teal-400 transition-colors">
@@ -94,8 +125,8 @@ export function TechnicianRegister() {
               </div>
             </div>
             <div className="flex gap-3 mt-6">
-              <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>Kembali</Button>
-              <Button variant="teal" className="flex-1" onClick={() => setStep(4)}>Submit KYC</Button>
+              <Button variant="outline" className="flex-1" onClick={() => goToStep(2)}>Kembali</Button>
+              <Button variant="teal" className="flex-1" onClick={handleSubmitKYC}>Submit KYC</Button>
             </div>
           </>
         )}
@@ -107,7 +138,7 @@ export function TechnicianRegister() {
             <h2 className="font-display text-xl font-700 text-gray-900 dark:text-white mb-2">Pendaftaran Diterima!</h2>
             <p className="text-sm text-gray-500 mb-2">KYC kamu sedang diverifikasi tim TechFix (1-2 hari kerja).</p>
             <p className="text-sm text-gray-500 mb-8">Kamu akan mendapat notifikasi WhatsApp setelah disetujui.</p>
-            <Button variant="teal" className="w-full" onClick={() => navigate('/technician')}>Masuk ke Dashboard</Button>
+            <Button variant="teal" className="w-full" onClick={handleFinish}>Masuk ke Dashboard</Button>
           </div>
         )}
       </Card>
@@ -118,32 +149,58 @@ export function TechnicianRegister() {
 // ── DASHBOARD ───────────────────────────────────────────────────
 export function TechnicianDashboard() {
   const navigate = useNavigate()
-  const pending = orders.filter(o => o.escrow === 'waiting' || o.escrow === 'progress')
+  const tech = getCurrentTechnician()
+  const myOrders = getOrdersByTechId(tech.id)
+const completed = myOrders.filter(o => o.status === 'done')
+const totalEarnings = completed.reduce((sum, o) => sum + (o.amount || 0), 0)
+  const formattedEarnings = totalEarnings >= 1000000
+    ? `Rp${(totalEarnings / 1000000).toFixed(1).replace('.0','')}jt`
+    : `Rp${totalEarnings.toLocaleString('id')}`
+
+  if (kycStatus === 'pending') {
+    return (
+      <TechLayout activeTab="dashboard">
+        <div className="py-12 text-center">
+          <div className="w-20 h-20 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mx-auto mb-4">
+            <Clock size={40} className="text-yellow-500" />
+          </div>
+          <h2 className="font-display text-xl font-700 text-gray-900 dark:text-white mb-2">Verifikasi Sedang Diproses</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">KYC kamu sedang diverifikasi tim TechFix.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Estimasi 1-2 hari kerja. Kamu akan mendapat notifikasi WhatsApp setelah disetujui.</p>
+          <Badge color="yellow">Status: Pending</Badge>
+        </div>
+      </TechLayout>
+    )
+  }
+
   return (
     <TechLayout activeTab="dashboard">
       <div className="py-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Selamat datang 👋</p>
-            <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white">Budi Santoso</h1>
+            <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white">{profile?.name || 'Budi Santoso'}</h1>
           </div>
           <div className="flex items-center gap-2">
             <Badge color="green">Aktif</Badge>
-            <Badge color="teal">KYC ✓</Badge>
+            {kycStatus === 'approved' && <Badge color="teal">KYC ✓</Badge>}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <StatCard label="Penghasilan Bulan Ini" value="Rp2,4jt" sub="↑ 12% vs bulan lalu" icon={DollarSign} color="teal" />
-          <StatCard label="Order Selesai" value="48" sub="Bulan ini" icon={CheckCircle} color="green" />
-          <StatCard label="Rating" value="4.9★" sub="127 ulasan" icon={Star} color="orange" />
-          <StatCard label="Order Aktif" value={String(pending.length)} sub="Menunggu tindakan" icon={Package} color="blue" />
+          <StatCard label="Penghasilan Bulan Ini" value={formattedEarnings} sub={`${completed.length} order selesai`} icon={DollarSign} color="teal" />
+          <StatCard label="Order Selesai" value={String(completed.length)} sub="Semua waktu" icon={CheckCircle} color="green" />
+          <StatCard label="Order Aktif" value={String(pending.length)} sub="Menunggu tindakan" icon={Package} color="orange" />
+          <StatCard label="Total Order" value={String(myOrders.length)} sub="Termasuk selesai" icon={Star} color="blue" />
         </div>
 
         <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Order Aktif</h2>
         <div className="space-y-3 mb-6">
+          {pending.length === 0 && (
+            <EmptyState icon={Package} title="Belum ada order aktif" desc="Order baru akan muncul di sini" />
+          )}
           {pending.map(o => (
-            <Card key={o.id} hover className="p-4" onClick={() => navigate('/technician/orders')}>
+            <Card key={o.id} hover className="p-4" onClick={() => navigate(`/technician/orders/${o.id}`)}>
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">{o.service}</p>
@@ -151,7 +208,7 @@ export function TechnicianDashboard() {
                   <div className="mt-2"><EscrowStatus status={o.escrow} /></div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-sm text-gray-900 dark:text-white">Rp{o.price.toLocaleString('id')}</p>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-white">Rp{o.amount.toLocaleString('id')}</p>
                   <ChevronRight size={16} className="text-gray-400 ml-auto mt-1" />
                 </div>
               </div>
@@ -164,7 +221,7 @@ export function TechnicianDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-gray-900 dark:text-white text-sm">Paket Basic</p>
-              <p className="text-xs text-gray-500">Aktif hingga 30 Jun 2025</p>
+              <p className="text-xs text-gray-500">Aktif hingga 30 Jun 2026</p>
             </div>
             <Button variant="outline" size="sm" onClick={() => navigate('/technician/settings')}>Upgrade</Button>
           </div>
@@ -176,73 +233,47 @@ export function TechnicianDashboard() {
 
 // ── ORDERS ──────────────────────────────────────────────────────
 export function TechnicianOrders() {
-  const [selected, setSelected] = useState(null)
-  const [updateSent, setUpdateSent] = useState(false)
-
-  if (selected) {
-    const o = orders.find(x => x.id === selected)
-    return (
-      <TechLayout activeTab="orders">
-        <div className="py-6">
-          <button onClick={() => setSelected(null)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-4"><ArrowLeft size={16} />Kembali</button>
-          <h1 className="font-display text-xl font-700 text-gray-900 dark:text-white mb-4">Detail Order</h1>
-          <Card className="p-5 mb-4">
-            <div className="flex justify-between mb-2">
-              <span className="font-mono text-sm text-brand-500">{o.id}</span>
-              <EscrowStatus status={o.escrow} />
-            </div>
-            <p className="font-semibold text-gray-900 dark:text-white">{o.service}</p>
-            <p className="text-sm text-gray-500 mt-1">Pelanggan: Hashfi H. · {o.date}</p>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white mt-2">Rp{o.price.toLocaleString('id')}</p>
-          </Card>
-
-          {!updateSent ? (
-            <Card className="p-5 mb-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Kirim Update Progres</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
-                  <select className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 dark:text-white">
-                    <option>Diagnosa awal selesai</option>
-                    <option>Menunggu sparepart</option>
-                    <option>Perbaikan berlangsung</option>
-                    <option>Servis selesai, siap diambil</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Catatan untuk pelanggan</label>
-                  <textarea className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 dark:text-white" rows={3} placeholder="Ceritakan kondisi perangkat..." />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Foto progres</label>
-                  <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center cursor-pointer hover:border-teal-400 transition-colors">
-                    <Camera size={18} className="mx-auto text-gray-400 mb-1" />
-                    <p className="text-xs text-gray-400">Upload foto</p>
-                  </div>
-                </div>
-              </div>
-              <Button variant="teal" className="w-full mt-4" onClick={() => setUpdateSent(true)}>Kirim Update</Button>
-            </Card>
-          ) : (
-            <Card className="p-5 mb-4">
-              <div className="flex items-center gap-3">
-                <CheckCircle size={20} className="text-teal-500" />
-                <p className="text-sm text-gray-700 dark:text-gray-300">Update progres berhasil dikirim ke pelanggan.</p>
-              </div>
-            </Card>
-          )}
-        </div>
-      </TechLayout>
-    )
-  }
+  const navigate = useNavigate()
+  const tech = getCurrentTechnician()
+  const [orders] = useState(getOrdersByTechId(tech.id))
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const filteredOrders = orders.filter(o => (filterStatus === 'all' || o.status === filterStatus) && (searchQuery === '' || o.service.toLowerCase().includes(searchQuery.toLowerCase()) || o.id.includes(searchQuery)))
 
   return (
     <TechLayout activeTab="orders">
       <div className="py-6">
         <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Manajemen Order</h1>
+        <Card className="p-4 mb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="w-full sm:w-48 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-accent-500 focus:ring-4 focus:ring-accent-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+            >
+              <option value="all">Semua status</option>
+              <option value="waiting">Menunggu</option>
+              <option value="progress">Diproses</option>
+              <option value="done">Selesai</option>
+              <option value="rejected">Ditolak</option>
+            </select>
+            <div className="relative flex-1">
+              <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari nama layanan atau ID order"
+                className="pl-10"
+              />
+            </div>
+          </div>
+        </Card>
         <div className="space-y-3">
-          {orders.map(o => (
-            <Card key={o.id} hover className="p-4" onClick={() => setSelected(o.id)}>
+          {filteredOrders.length === 0 && (
+            <EmptyState icon={Package} title="Belum ada order" desc="Order yang masuk akan muncul di sini" />
+          )}
+          {filteredOrders.map(o => (
+            <Card key={o.id} hover className="p-4" onClick={() => navigate(`/technician/orders/${o.id}`)}>
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white text-sm">{o.service}</p>
@@ -250,7 +281,7 @@ export function TechnicianOrders() {
                   <div className="mt-2"><EscrowStatus status={o.escrow} /></div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-sm text-gray-900 dark:text-white">Rp{o.price.toLocaleString('id')}</p>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-white">Rp{o.amount.toLocaleString('id')}</p>
                   <ChevronRight size={16} className="text-gray-400 ml-auto mt-1" />
                 </div>
               </div>
@@ -264,16 +295,26 @@ export function TechnicianOrders() {
 
 // ── EARNINGS ────────────────────────────────────────────────────
 export function TechnicianEarnings() {
-  const months = ['Jan','Feb','Mar','Apr','Mei','Jun']
-  const vals =   [800, 1200, 1500, 1800, 2100, 2400]
-  const maxVal = Math.max(...vals)
+  const tech = getCurrentTechnician()
+  const earnings = getTechnicianEarnings(tech.id)
+  const chartData = earnings.byMonth.slice(-6)
+  const months = chartData.map(d => d.month)
+  const vals = chartData.map(d => d.amount / 1000)
+  const maxVal = Math.max(...vals, 1)
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+  
+  function handleWithdraw(amount, method, accountNumber) {
+    toast.success('Permintaan pencairan dana berhasil diajukan!')
+    setShowWithdrawModal(false)
+  }
+  
   return (
     <TechLayout activeTab="earnings">
       <div className="py-6">
         <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Penghasilan</h1>
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <StatCard label="Bulan Ini" value="Rp2,4jt" sub="48 order selesai" icon={DollarSign} color="teal" />
-          <StatCard label="Total 2025" value="Rp9,8jt" sub="↑ 28% vs 2024" icon={TrendingUp} color="green" />
+          <StatCard label="Bulan Ini" value={`Rp${(earnings.thisMonth / 1000).toFixed(1).replace('.0','')}jt`} sub={`${earnings.completed} order selesai`} icon={DollarSign} color="teal" />
+          <StatCard label="Total 2026" value={`Rp${(earnings.total / 1000000).toFixed(1).replace('.0','')}jt`} sub="↑ dari tahun lalu" icon={TrendingUp} color="green" />
         </div>
 
         <Card className="p-5 mb-4">
@@ -291,9 +332,9 @@ export function TechnicianEarnings() {
 
         <Card className="p-5">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Pencairan Dana</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Saldo tersedia: <span className="font-semibold text-gray-900 dark:text-white">Rp2.400.000</span></p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Saldo tersedia: <span className="font-semibold text-gray-900 dark:text-white">Rp{earnings.thisMonth.toLocaleString('id')}</span></p>
           <div className="space-y-2 mb-4">
-            {[{m:'Transfer Bank (BCA)', a:'Rp2.400.000'},{m:'OVO',a:'Rp0'}].map(x=>(
+            {[{m:'Transfer Bank (BCA)', a:`Rp${earnings.thisMonth.toLocaleString('id')}`},{m:'OVO',a:'Rp0'}].map(x=>(
               <label key={x.m} className="flex items-center gap-3 cursor-pointer">
                 <input type="radio" name="withdraw" className="accent-teal-500" />
                 <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">{x.m}</span>
@@ -301,9 +342,15 @@ export function TechnicianEarnings() {
               </label>
             ))}
           </div>
-          <Button variant="teal" className="w-full">Cairkan Dana</Button>
+          <Button variant="teal" className="w-full" onClick={() => setShowWithdrawModal(true)}>Cairkan Dana</Button>
         </Card>
       </div>
+      <WithdrawModal
+        isOpen={showWithdrawModal}
+        onClose={() => setShowWithdrawModal(false)}
+        availableBalance={earnings.thisMonth}
+        onSubmit={handleWithdraw}
+      />
     </TechLayout>
   )
 }
@@ -311,25 +358,58 @@ export function TechnicianEarnings() {
 // ── SETTINGS ────────────────────────────────────────────────────
 export function TechnicianSettings() {
   const navigate = useNavigate()
+  const tech = getCurrentTechnician()
+  const kycApps = getKYCRequests()
+  const kycData = kycApps.find(k => k.name === tech.name) || null
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState(null)
   const plans = [
     { id: 'basic', name: 'Basic', price: 50000, desc: 'Tampil di halaman pencarian' },
     { id: 'gold', name: 'Gold', price: 100000, desc: 'Prioritas di halaman depan', popular: true },
     { id: 'platinum', name: 'Platinum', price: 150000, desc: 'Top placement + badge premium' },
   ]
+  
+  const kycStatusConfig = {
+    approved: { color: 'green', label: 'KYC Verified', action: null },
+    pending: { color: 'yellow', label: 'KYC Pending Review', action: null },
+    rejected: { color: 'red', label: 'KYC Rejected', action: 'Ajukan Ulang' },
+    null: { color: 'gray', label: 'Belum Submit KYC', action: 'Submit KYC' }
+  }
+  const kycStatus = kycData ? kycData.status : null
+  const kycConfig = kycStatusConfig[kycStatus]
+  
+  function handleUpgradeClick(plan) {
+    setSelectedPlan(plan)
+    setShowUpgradeModal(true)
+  }
+  
+  function handleUpgradeConfirm() {
+    toast.success(`Upgrade ke ${selectedPlan.name} berhasil!`)
+    setShowUpgradeModal(false)
+  }
+  
   return (
     <TechLayout activeTab="settings">
       <div className="py-6">
         <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Akun Teknisi</h1>
         <Card className="p-5 mb-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-display text-2xl font-700">B</div>
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-display text-2xl font-700">{tech.name.charAt(0)}</div>
             <div>
-              <p className="font-semibold text-gray-900 dark:text-white">Budi Santoso</p>
-              <p className="text-sm text-gray-500">budi@email.com</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{tech.name}</p>
+              <p className="text-sm text-gray-500">{tech.email || 'budi@email.com'}</p>
               <div className="flex gap-2 mt-1">
-                <Badge color="green">KYC Verified</Badge>
+                <Badge color={kycConfig.color}>{kycConfig.label}</Badge>
                 <Badge color="teal">Top Rated</Badge>
               </div>
+              {kycConfig.action && (
+                <Button variant="outline" size="sm" className="mt-2" onClick={() => alert('KYC submission form - backend not implemented yet')}>
+                  {kycConfig.action}
+                </Button>
+              )}
+              {kycStatus === 'rejected' && kycData?.rejectionReason && (
+                <p className="text-xs text-red-500 mt-1">Alasan ditolak: {kycData.rejectionReason}</p>
+              )}
             </div>
           </div>
         </Card>
@@ -347,7 +427,7 @@ export function TechnicianSettings() {
                 <span className="font-display font-700 text-gray-900 dark:text-white">Rp{p.price.toLocaleString('id')}<span className="text-xs text-gray-400 font-normal">/bln</span></span>
               </div>
               <p className="text-xs text-gray-500 mt-1">{p.desc}</p>
-              {p.id !== 'basic' && <Button variant="outline" size="sm" className="mt-3 w-full">Upgrade ke {p.name}</Button>}
+              {p.id !== 'basic' && <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => handleUpgradeClick(p)}>Upgrade ke {p.name}</Button>}
             </div>
           ))}
         </div>
@@ -356,6 +436,13 @@ export function TechnicianSettings() {
           <LogOut size={16} /> Keluar
         </button>
       </div>
+      <UpgradePremiumModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        currentPlan={plans[0]}
+        newPlan={selectedPlan}
+        onConfirm={handleUpgradeConfirm}
+      />
     </TechLayout>
   )
 }

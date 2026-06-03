@@ -15,10 +15,10 @@ function CustomerLayout({ children, activeTab }) {
   ]
   return (
     <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="max-w-2xl mx-auto px-4 pb-24">{children}</div>
+      <div className="max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pb-24">{children}</div>
       {/* Bottom nav */}
       <nav className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-40 safe-area-bottom">
-        <div className="max-w-2xl mx-auto flex">
+        <div className="max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto flex">
           {tabs.map(t => (
             <button key={t.id} onClick={() => navigate(t.path)}
               className={`flex-1 flex flex-col items-center py-3 gap-1 text-xs transition-colors ${activeTab === t.id ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400'}`}>
@@ -298,7 +298,7 @@ export function TechnicianProfile() {
   ]
   return (
     <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 pb-24">
-      <div className="max-w-2xl mx-auto px-4">
+      <div className="max-w-2xl md:max-w-3xl mx-auto px-4">
         <div className="py-4">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-4">
             <ArrowLeft size={16} /> Kembali
@@ -380,7 +380,7 @@ export function Booking() {
   const [step, setStep] = useState(1)
   return (
     <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 pb-8">
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="max-w-xl mx-auto px-4 py-6">
         <button onClick={() => step > 1 ? setStep(s => s-1) : navigate(-1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-4">
           <ArrowLeft size={16} /> {step > 1 ? 'Kembali' : 'Batalkan'}
         </button>

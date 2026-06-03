@@ -14,9 +14,9 @@ function TechLayout({ children, activeTab }) {
   ]
   return (
     <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="max-w-2xl mx-auto px-4 pb-24">{children}</div>
+      <div className="max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pb-24">{children}</div>
       <nav className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-40">
-        <div className="max-w-2xl mx-auto flex">
+        <div className="max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto flex">
           {tabs.map(t => (
             <button key={t.id} onClick={() => navigate(t.path)}
               className={`flex-1 flex flex-col items-center py-3 gap-1 text-xs transition-colors ${activeTab === t.id ? 'text-accent-500' : 'text-gray-500 dark:text-gray-400'}`}>

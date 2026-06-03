@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build output
+dist/
+.vite/
+.vercel/
+
+# Development
+.DS_Store
+*.log
+*.swp
+.env
+.env.local
+.env.production
+.env.test
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OpenSpec & temp
+.sisyphus/
+openspec/changes/archive/
+
+# Docs
+docs/

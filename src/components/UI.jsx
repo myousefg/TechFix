@@ -96,11 +96,16 @@ export function Button({ children, variant = 'primary', size = 'md', className =
   return <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...props}>{children}</button>
 }
 
-export function Input({ label, ...props }) {
+export function Input({ label, maxLen = 200, ...props }) {
   return (
     <div className="space-y-1.5">
       {label && <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>}
-      <input className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all hover:border-gray-300 dark:hover:border-gray-600" {...props} />
+      <input
+        maxLength={maxLen}
+        autoComplete={props.type === 'password' ? 'current-password' : props.autoComplete}
+        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all hover:border-gray-300 dark:hover:border-gray-600"
+        {...props}
+      />
     </div>
   )
 }

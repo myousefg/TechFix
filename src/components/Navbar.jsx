@@ -1,13 +1,93 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Sun, Moon, Menu, X, Wrench, ChevronDown, ArrowRight } from 'lucide-react'
+import { Sun, Moon, Menu, X, Wrench, ChevronDown, ArrowRight, Bell, Package, Shield, Tag, Info } from 'lucide-react'
 import { useTheme } from '../ThemeContext'
+import { getNotifications, markNotifsRead } from '../store'
 
 const portals = [
   { label: 'Pelanggan', path: '/customer',    color: 'text-brand-500',  bg: 'bg-brand-50 dark:bg-brand-900/30',  desc: 'Cari & pesan teknisi' },
   { label: 'Teknisi',   path: '/technician',  color: 'text-teal-500',   bg: 'bg-teal-50 dark:bg-teal-900/30',   desc: 'Kelola order & penghasilan' },
   { label: 'Admin',     path: '/admin',        color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/30',desc: 'Dashboard platform' },
 ]
+
+function NotificationDropdown({ scrolled }) {
+  const [open, setOpen] = useState(false)
+  const [notifs, setNotifs] = useState(getNotifications())
+  const dropdownRef = useRef(null)
+  
+  const typeConfig = {
+    order:  { icon: Package, color: 'bg-brand-50 dark:bg-brand-900/30',  text: 'text-brand-500'  },
+    escrow: { icon: Shield,  color: 'bg-green-50 dark:bg-green-900/30',  text: 'text-green-500'  },
+    promo:  { icon: Tag,     color: 'bg-orange-50 dark:bg-orange-900/30',text: 'text-orange-500' },
+    system: { icon: Info,    color: 'bg-gray-100 dark:bg-gray-800',       text: 'text-gray-500'   },
+  }
+  
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+  
+  function markOne(id) {
+    const updated = notifs.map(n => n.id === id ? { ...n, read: true } : n)
+    setNotifs(updated)
+    markNotifsRead(updated)
+  }
+  
+  const unread = notifs.filter(n => !n.read).length
+  
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button onClick={() => setOpen(!open)} className="relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+        <Bell size={20} />
+        {unread > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-500 text-white text-xs font-bold rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-900">
+            {unread}
+          </span>
+        )}
+      </button>
+      
+      {open && (
+        <div className="absolute top-full mt-2 right-0 w-80 max-h-96 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl overflow-hidden animate-scale-in z-50">
+          <div className="p-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+            <p className="font-semibold text-sm text-gray-900 dark:text-white">Notifikasi</p>
+            {unread > 0 && <span className="text-xs text-brand-500 font-medium">{unread} baru</span>}
+          </div>
+          <div className="overflow-y-auto max-h-80">
+            {notifs.map(n => {
+              const cfg = typeConfig[n.type] || typeConfig.system
+              const Icon = cfg.icon
+              return (
+                <button
+                  key={n.id}
+                  onClick={() => markOne(n.id)}
+                  className={`w-full text-left p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-b-0 ${!n.read ? 'bg-brand-50/30 dark:bg-brand-900/10' : ''}`}>
+                  <div className="flex items-start gap-2">
+                    <div className={`w-8 h-8 rounded-lg ${cfg.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                      <Icon size={14} className={cfg.text} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-1">
+                        <p className={`text-xs font-medium ${!n.read ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{n.title}</p>
+                        {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-brand-500 flex-shrink-0 mt-1" />}
+                      </div>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{n.body}</p>
+                      <p className="text-[10px] text-gray-400 mt-1">{n.time}</p>
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Navbar() {
   const { dark, toggle } = useTheme()
@@ -82,6 +162,7 @@ export default function Navbar() {
 
         {/* Right */}
         <div className="flex items-center gap-2">
+          {location.pathname.startsWith('/customer') && <NotificationDropdown scrolled={scrolled} />}
           <button onClick={toggle}
             className={`p-2 rounded-lg transition-colors ${scrolled || location.pathname !== '/' ? 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
             {dark ? <Sun size={17} /> : <Moon size={17} />}

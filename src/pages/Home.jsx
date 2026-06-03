@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Shield, Zap, Star, ArrowRight, CheckCircle, Wrench, ChevronRight } from 'lucide-react'
+import { Shield, Zap, Star, ArrowRight, CheckCircle, Wrench } from 'lucide-react'
 import { TechnicianCard, Button, Badge } from '../components/UI'
 import { technicians, services } from '../data'
 

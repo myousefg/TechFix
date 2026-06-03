@@ -1,5 +1,5 @@
 import React from 'react'
-import { Star, Shield, Clock, CheckCircle } from 'lucide-react'
+import { Star, Shield, Clock } from 'lucide-react'
 
 export function Badge({ children, color = 'blue' }) {
   const colors = {

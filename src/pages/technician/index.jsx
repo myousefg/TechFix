@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Home, Package, TrendingUp, Star, Settings, LogOut, CheckCircle, ChevronRight, ArrowLeft, Upload, Camera, DollarSign, Clock } from 'lucide-react'
+import { Home, Package, TrendingUp, Star, Settings, LogOut, CheckCircle, ChevronRight, ArrowLeft, Upload, Camera, DollarSign, Clock, Search } from 'lucide-react'
 import { Card, Badge, Button, Input, EscrowStatus, StatCard, EmptyState } from '../../components/UI'
 import { TechnicianOrderDetail } from '../../components/TechnicianOrderDetail'
 import { getOrders, updateOrder, saveSession, loadSession, removeSession, getTechnicianProfile, saveTechnicianProfile, getCurrentTechnicianId, getCurrentTechnician, getOrdersByTechId, getTechnicianEarnings, getKYCRequests } from '../../store'
@@ -151,11 +151,18 @@ export function TechnicianDashboard() {
   const navigate = useNavigate()
   const tech = getCurrentTechnician()
   const myOrders = getOrdersByTechId(tech.id)
-const completed = myOrders.filter(o => o.status === 'done')
-const totalEarnings = completed.reduce((sum, o) => sum + (o.amount || 0), 0)
+  const completed = myOrders.filter(o => o.status === 'done')
+  const totalEarnings = completed.reduce((sum, o) => sum + (o.amount || 0), 0)
   const formattedEarnings = totalEarnings >= 1000000
     ? `Rp${(totalEarnings / 1000000).toFixed(1).replace('.0','')}jt`
     : `Rp${totalEarnings.toLocaleString('id')}`
+
+  const kycApps = getKYCRequests()
+  const kycData = kycApps.find(k => k.name === tech.name) || null
+  const kycStatus = kycData ? kycData.status : null
+
+  const pending = myOrders.filter(o => o.status === 'waiting' || o.status === 'progress')
+  const profile = getTechnicianProfile()
 
   if (kycStatus === 'pending') {
     return (
@@ -303,8 +310,7 @@ export function TechnicianEarnings() {
   const maxVal = Math.max(...vals, 1)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
   
-  function handleWithdraw(amount, method, accountNumber) {
-    toast.success('Permintaan pencairan dana berhasil diajukan!')
+  function handleWithdraw({ amount, method, accountNumber }) {
     setShowWithdrawModal(false)
   }
   
@@ -345,12 +351,12 @@ export function TechnicianEarnings() {
           <Button variant="teal" className="w-full" onClick={() => setShowWithdrawModal(true)}>Cairkan Dana</Button>
         </Card>
       </div>
-      <WithdrawModal
-        isOpen={showWithdrawModal}
-        onClose={() => setShowWithdrawModal(false)}
-        availableBalance={earnings.thisMonth}
-        onSubmit={handleWithdraw}
-      />
+  <WithdrawModal
+isOpen={showWithdrawModal}
+onClose={() => setShowWithdrawModal(false)}
+balance={earnings.thisMonth}
+onSubmit={handleWithdraw}
+/>
     </TechLayout>
   )
 }

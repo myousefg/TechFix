@@ -168,7 +168,8 @@ export function JobStatusModal({ order, action, onClose, onUpdate }) {
   )
 }
 
-export function WithdrawModal({ balance, onClose, onSubmit }) {
+export function WithdrawModal({ isOpen, balance, onClose, onSubmit }) {
+  if (!isOpen) return null
   const [amount, setAmount] = useState('')
   const [method, setMethod] = useState('')
   const [accountNumber, setAccountNumber] = useState('')
@@ -181,7 +182,7 @@ export function WithdrawModal({ balance, onClose, onSubmit }) {
       toast.error('Masukkan nominal yang valid')
       return
     }
-    if (amt > balance) {
+    if (amt > (balance || 0)) {
       toast.error('Saldo tidak cukup')
       return
     }
@@ -257,7 +258,8 @@ export function WithdrawModal({ balance, onClose, onSubmit }) {
   )
 }
 
-export function UpgradePremiumModal({ currentPlan, newPlan, onClose, onConfirm }) {
+export function UpgradePremiumModal({ isOpen, currentPlan, newPlan, onClose, onConfirm }) {
+  if (!isOpen) return null
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <Card className="max-w-md w-full" onClick={e => e.stopPropagation()}>

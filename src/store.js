@@ -58,7 +58,7 @@ export function getCustomerByFullName(name) {
   return getOrders().find(o => o.customer === name)?.customer
 }
 export function getTechnicianById(id) {
-  const t = technicians.find(t => t.id === Number(id))
+  const t = defaultTechnicians.find(t => t.id === Number(id))
   if (!t) return null
   return {
     ...t,

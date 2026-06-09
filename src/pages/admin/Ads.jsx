@@ -194,7 +194,7 @@ function AdCampaignForm({ initial, partners, onClose, onSaved }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Input type="number" label="Budget (Rp)" value={form.budget} onChange={e => setForm({ ...form, budget: Number(e.target.value) })} />
-            <Input label="Tanggal Berakhir" value={form.end} onChange={e => setForm({ ...form, end: e.target.value })} placeholder="cth: 30 Jun 2025" />
+            <Input type="date" label="Tanggal Berakhir" value={form.end} onChange={e => setForm({ ...form, end: e.target.value })} />
           </div>
         </div>
         <div className="flex gap-3 mt-6">

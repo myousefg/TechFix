@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
-import { X } from 'lucide-react'
+import { X, Upload, Camera } from 'lucide-react'
 import { Card, Button, Input } from './UI'
 
 export function AcceptOrderModal({ order, onClose, onAccept }) {
@@ -294,6 +294,140 @@ export function UpgradePremiumModal({ isOpen, currentPlan, newPlan, onClose, onC
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose} className="flex-1">Batal</Button>
             <Button onClick={onConfirm} className="flex-1">Konfirmasi Upgrade</Button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+export function KYCSubmissionModal({ isOpen, onClose, tech, onSubmit, initialData = null }) {
+  if (!isOpen) return null
+
+  const [ktpNumber, setKtpNumber] = useState(initialData?.ktpNumber || '')
+  const [ktpPreview, setKtpPreview] = useState(initialData?.ktpPhotoUrl || '')
+  const [selfiePreview, setSelfiePreview] = useState(initialData?.selfiePhotoUrl || '')
+  const [docs, setDocs] = useState(initialData?.docs || ['KTP'])
+
+  const [ktpFile, setKtpFile] = useState(null)
+  const [selfieFile, setSelfieFile] = useState(null)
+
+  const availableDocs = ['KTP', 'Sertifikat', 'Ijazah', 'Surat Keterangan Kerja']
+
+  const handleFileChange = (e, setFile, setPreview) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setFile(file)
+      const url = URL.createObjectURL(file)
+      setPreview(url)
+    }
+  }
+
+  const toggleDoc = (doc) => {
+    if (docs.includes(doc)) {
+      setDocs(docs.filter(d => d !== doc))
+    } else {
+      setDocs([...docs, doc])
+    }
+  }
+
+  const handleSubmit = () => {
+    if (!ktpNumber.trim()) {
+      toast.error('Nomor KTP wajib diisi')
+      return
+    }
+    if (!ktpPreview || !selfiePreview) {
+      toast.error('Foto KTP dan Selfie wajib diupload')
+      return
+    }
+    onSubmit({
+      ktpNumber: ktpNumber.trim(),
+      ktpPhotoUrl: ktpPreview,
+      selfiePhotoUrl: selfiePreview,
+      docs,
+    })
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
+      <Card className="max-w-md w-full" onClick={e => e.stopPropagation()}>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-display font-600 text-gray-900 dark:text-white">Submit KYC</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <X size={20} />
+            </button>
+          </div>
+
+          <p className="text-sm text-gray-500 mb-4">Teknisi: <span className="font-medium text-gray-900 dark:text-white">{tech?.name}</span></p>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nomor KTP</label>
+              <input
+                type="text"
+                value={ktpNumber}
+                onChange={(e) => setKtpNumber(e.target.value)}
+                placeholder="3273xxxxxxxxxxxxxx"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Foto KTP</label>
+              <label className="block border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center cursor-pointer hover:border-teal-400 transition-colors">
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, setKtpFile, setKtpPreview)} />
+                {ktpPreview ? (
+                  <img src={ktpPreview} alt="KTP Preview" className="mx-auto max-h-32 rounded object-contain" />
+                ) : (
+                  <>
+                    <Upload size={20} className="mx-auto text-gray-400 mb-1" />
+                    <p className="text-xs text-gray-400">Upload foto KTP</p>
+                  </>
+                )}
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Selfie dengan KTP</label>
+              <label className="block border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center cursor-pointer hover:border-teal-400 transition-colors">
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, setSelfieFile, setSelfiePreview)} />
+                {selfiePreview ? (
+                  <img src={selfiePreview} alt="Selfie Preview" className="mx-auto max-h-32 rounded object-contain" />
+                ) : (
+                  <>
+                    <Camera size={20} className="mx-auto text-gray-400 mb-1" />
+                    <p className="text-xs text-gray-400">Foto selfie sambil pegang KTP</p>
+                  </>
+                )}
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Dokumen Pendukung</label>
+              <div className="flex flex-wrap gap-2">
+                {availableDocs.map(doc => (
+                  <button
+                    key={doc}
+                    type="button"
+                    onClick={() => toggleDoc(doc)}
+                    className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                      docs.includes(doc)
+                        ? 'bg-teal-500 text-white border-teal-500'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    {doc}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 mt-6">
+            <Button variant="outline" onClick={onClose} className="flex-1">Batal</Button>
+            <Button onClick={handleSubmit} className="flex-1">Submit KYC</Button>
           </div>
         </div>
       </Card>

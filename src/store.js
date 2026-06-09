@@ -245,6 +245,40 @@ export function updateKYCStatus(id, status) {
   return list
 }
 
+export function submitKYC(data) {
+  const list = getKYCRequests()
+  const existingIdx = list.findIndex(k => 
+    k.techId === data.techId && (k.status === 'pending' || k.status === 'rejected')
+  )
+
+  const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+
+  const newEntry = {
+    id: existingIdx !== -1 ? list[existingIdx].id : (Math.max(0, ...list.map(k => k.id)) + 1),
+    techId: data.techId,
+    techName: data.techName,
+    specialty: data.specialty || '',
+    submitted: today,
+    status: 'pending',
+    ktpNumber: data.ktpNumber || '',
+    ktpPhotoUrl: data.ktpPhotoUrl || 'https://placehold.co/400x250/3b82f6/white?text=KTP',
+    selfiePhotoUrl: data.selfiePhotoUrl || 'https://placehold.co/300x300/10b981/white?text=Selfie',
+    docs: data.docs || ['KTP'],
+    reviewedAt: null,
+    reviewedBy: null,
+    rejectionReason: null,
+  }
+
+  if (existingIdx !== -1) {
+    list[existingIdx] = newEntry
+  } else {
+    list.push(newEntry)
+  }
+
+  save('kyc_requests', list)
+  return newEntry
+}
+
 export function getDisputes() {
   return load('disputes', [
     { id: 'D-001', order: 'TF-003', orderId: 'TF-003', claimant: 'Maya Sari',       tech: 'Agus Pramono',  issue: 'Pelanggan mengklaim laptop masih bermasalah setelah servis', amount: 450000, status: 'open',     openedAt: '2 Jun 2026',  resolvedAt: null,             resolution: null,           aiConfidence: 70, aiRecommendation: 'Refund 50% escrow ke pelanggan', evidence: [{ type: 'image', label: 'Foto kondisi laptop setelah servis', url: 'https://placehold.co/400x300/ef4444/white?text=Evidence+1' }], timeline: [{ at: '1 Jun 2026',  event: 'Order dibuat' }, { at: '2 Jun 2026',  event: 'Sengketa dibuka oleh customer' }], respondedBy: null },

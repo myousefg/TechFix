@@ -9,6 +9,11 @@
     font-family: 'DM Sans', sans-serif;
     transition: background-color 0.3s, color 0.3s;
   }
+  /* Fix native date/datetime picker icon invisible in dark mode */
+  .dark input[type="date"],
+  .dark input[type="datetime-local"] {
+    color-scheme: dark;
+  }
 }
 
 @layer utilities {

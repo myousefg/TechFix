@@ -12,11 +12,18 @@ export function TechnicianOrderDetailPage() {
   const { id } = useParams()
   const [orders, setOrders] = useState(getOrders)
   const [updateSent, setUpdateSent] = useState(false)
+  const [progressStatus, setProgressStatus] = useState('Diagnosa awal selesai')
+  const [progressNotes, setProgressNotes] = useState('')
   const [showAcceptModal, setShowAcceptModal] = useState(false)
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [showJobStatusModal, setShowJobStatusModal] = useState(false)
   const [jobStatusAction, setJobStatusAction] = useState('start')
   const order = orders.find(o => o.id === id)
+
+  const latestUpdate = order?.progressUpdates?.length 
+    ? order.progressUpdates[order.progressUpdates.length - 1] 
+    : null
+  const isServiceCompleted = !!order?.completed || (latestUpdate?.status === 'Servis selesai, siap diambil')
 
   if (!order) {
     return (
@@ -33,33 +40,67 @@ export function TechnicianOrderDetailPage() {
     )
   }
 
-  function handleUpdateStatus(orderId, statusText) {
-    if (statusText === 'Servis selesai, siap diambil') {
-      const updated = updateOrder(orderId, { escrow: 'progress', status: 'progress' })
-      setOrders(updated)
+  function appendProgressUpdate(status, notes) {
+    const prev = order.progressUpdates || []
+    const entry = {
+      id: Date.now(),
+      time: new Date().toISOString(),
+      status,
+      notes: notes || ''
     }
+    return [...prev, entry]
+  }
+
+  function handleUpdateStatus(orderId, statusText, notes) {
+    const progressUpdates = appendProgressUpdate(statusText, notes)
+    const updates = { techNotes: notes || '', progressUpdates }
+    if (statusText === 'Servis selesai, siap diambil') {
+      updates.escrow = 'progress'
+      updates.completed = true
+    }
+    const updated = updateOrder(orderId, updates)
+    setOrders(updated)
     setUpdateSent(true)
     toast.success('Update progres berhasil dikirim')
   }
 
+  function handleProgressSubmit() {
+    handleUpdateStatus(order.id, progressStatus, progressNotes)
+  }
+
   function handleAccept(estimatedStart) {
-    toast.success(estimatedStart ? 'Pesanan diterima. Estimasi mulai kerja telah dicatat.' : 'Pesanan berhasil diterima')
+    const updates = { status: 'progress', escrow: 'progress' }
+    if (estimatedStart) {
+      updates.estimatedStart = estimatedStart
+    }
+    const updated = updateOrder(order.id, updates)
+    setOrders(updated)
+    toast.success('Pesanan berhasil diterima')
     setShowAcceptModal(false)
   }
 
   function handleReject(reason, notes) {
     const rejectReason = typeof reason === 'object' ? reason.reason : reason
     const rejectNotes = typeof reason === 'object' ? reason.notes : notes
-
-    toast.success(rejectNotes ? `Pesanan ditolak: ${rejectReason}` : `Pesanan ditolak: ${rejectReason || 'alasan dicatat'}`)
+    const updated = updateOrder(order.id, { status: 'rejected', rejectionReason: rejectReason, rejectionNotes: rejectNotes || '' })
+    setOrders(updated)
+    toast.success(`Pesanan ditolak: ${rejectReason || 'alasan dicatat'}`)
     setShowRejectModal(false)
   }
 
   function handleJobStatus(action, notes) {
-    const nextAction = typeof action === 'object' ? action.action : action
-    const nextNotes = typeof action === 'object' ? action.notes : notes
-
-    toast.success(nextAction === 'complete' ? 'Pekerjaan ditandai selesai' : 'Pekerjaan berhasil dimulai')
+    const act = typeof action === 'object' ? action.action : action
+    const nts = typeof action === 'object' ? action.notes : notes
+    const statusLabel = act === 'complete' ? 'Servis selesai, siap diambil' : 'Update progres'
+    const progressUpdates = appendProgressUpdate(statusLabel, nts)
+    const updates = { techNotes: nts, progressUpdates }
+    if (act === 'complete') {
+      updates.escrow = 'progress'
+      updates.completed = true
+    }
+    const updated = updateOrder(order.id, updates)
+    setOrders(updated)
+    toast.success(act === 'complete' ? 'Servis ditandai selesai' : 'Update progres dikirim')
     setShowJobStatusModal(false)
   }
 
@@ -69,14 +110,17 @@ export function TechnicianOrderDetailPage() {
         <div className="py-6">
           <TechnicianOrderDetail
             order={order}
-            updateSent={updateSent}
-            onUpdateStatus={handleUpdateStatus}
-            onBack={() => { setUpdateSent(false); navigate(-1) }}
+            onBack={() => { 
+              setUpdateSent(false); 
+              setProgressStatus('Diagnosa awal selesai'); 
+              setProgressNotes(''); 
+              navigate(-1); 
+            }}
           />
 
           {(order.status === 'waiting' || order.status === 'progress') && (
             <Card className="p-5 mb-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Aksi Order</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Tindakan</h3>
 
               {order.status === 'waiting' && (
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -90,17 +134,93 @@ export function TechnicianOrderDetailPage() {
               )}
 
               {order.status === 'progress' && (
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button className="flex-1" onClick={() => { setJobStatusAction('start'); setShowJobStatusModal(true) }}>
-                    Mulai Servis
-                  </Button>
-                  {order.escrow === 'progress' && (
-                    <Button variant="outline" className="flex-1" onClick={() => { setJobStatusAction('complete'); setShowJobStatusModal(true) }}>
-                      Tandai Selesai
+                isServiceCompleted ? (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Servis selesai, siap diambil. Menunggu konfirmasi pelanggan.
+                  </p>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button className="flex-1" onClick={() => { setJobStatusAction('start'); setShowJobStatusModal(true) }}>
+                      Update Progres
                     </Button>
-                  )}
-                </div>
+                    <Button variant="outline" className="flex-1" onClick={() => { setJobStatusAction('complete'); setShowJobStatusModal(true) }}>
+                      Selesai Servis
+                    </Button>
+                  </div>
+                )
               )}
+            </Card>
+          )}
+
+          {order.status === 'progress' && !isServiceCompleted && !updateSent && (
+            <Card className="p-5 mb-4">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Kirim Update Progres</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
+                  <select 
+                    value={progressStatus} 
+                    onChange={(e) => setProgressStatus(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 dark:text-white">
+                    <option>Diagnosa awal selesai</option>
+                    <option>Menunggu sparepart</option>
+                    <option>Perbaikan berlangsung</option>
+                    <option>Servis selesai, siap diambil</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Catatan untuk pelanggan</label>
+                  <textarea
+                    value={progressNotes}
+                    onChange={(e) => setProgressNotes(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 dark:text-white"
+                    rows={3}
+                    placeholder="Ceritakan kondisi perangkat..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Foto progres</label>
+                  <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center cursor-pointer hover:border-teal-400 transition-colors">
+                    <Camera size={18} className="mx-auto text-gray-400 mb-1" />
+                    <p className="text-xs text-gray-400">Upload foto</p>
+                  </div>
+                </div>
+              </div>
+              <Button variant="teal" className="w-full mt-4" onClick={handleProgressSubmit}>
+                Kirim Update
+              </Button>
+            </Card>
+          )}
+          {order.status === 'progress' && !isServiceCompleted && updateSent && (
+            <Card className="p-5 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-teal-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300">Update progres berhasil dikirim ke pelanggan.</p>
+              </div>
+            </Card>
+          )}
+
+          {order.progressUpdates && order.progressUpdates.length > 0 && (
+            <Card className="p-5 mb-4">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Riwayat Update Progres</h3>
+              <div className="space-y-4">
+                {[...order.progressUpdates].reverse().map((u) => (
+                  <div key={u.id} className="border-l-2 border-teal-500 pl-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{u.status}</span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(u.time).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    {u.notes && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{u.notes}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </Card>
           )}
 

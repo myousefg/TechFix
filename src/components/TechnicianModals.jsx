@@ -120,7 +120,7 @@ export function JobStatusModal({ order, action, onClose, onUpdate }) {
   
   const handleUpdate = () => {
     onUpdate({ action, notes })
-    toast.success(action === 'start' ? 'Pekerjaan dimulai' : 'Pekerjaan selesai')
+    toast.success(action === 'start' ? 'Update progres dikirim' : 'Pekerjaan selesai')
     onClose()
   }
   
@@ -130,7 +130,7 @@ export function JobStatusModal({ order, action, onClose, onUpdate }) {
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-display font-600 text-gray-900 dark:text-white">
-              {action === 'start' ? 'Mulai Pekerjaan' : 'Tandai Selesai'}
+              {action === 'start' ? 'Update Progres' : 'Selesai Servis'}
             </h3>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
               <X size={20} />
@@ -144,7 +144,7 @@ export function JobStatusModal({ order, action, onClose, onUpdate }) {
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              placeholder={action === 'start' ? 'Catatan sebelum mulai kerja...' : 'Catatan hasil pekerjaan...'}
+              placeholder={action === 'start' ? 'Catatan update progres...' : 'Catatan hasil pekerjaan...'}
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white"
             />
@@ -159,7 +159,7 @@ export function JobStatusModal({ order, action, onClose, onUpdate }) {
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose} className="flex-1">Batal</Button>
             <Button onClick={handleUpdate} className="flex-1">
-              {action === 'start' ? 'Mulai Kerja' : 'Selesai'}
+              {action === 'start' ? 'Kirim Update' : 'Selesai'}
             </Button>
           </div>
         </div>

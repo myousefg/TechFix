@@ -30,6 +30,12 @@ export function AdminLayout({ children }) {
     { icon: SettingsIcon, label: 'Settings',             path: '/admin/settings' },
   ]
 
+  const getPageTitle = (pathname) => {
+    if (pathname === '/admin' || pathname === '/admin/') return 'Dashboard Admin'
+    const link = links.find(l => pathname.startsWith(l.path) && l.path !== '/admin')
+    return link ? link.label : 'Admin'
+  }
+
   return (
     <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
       <Toaster position="top-right" />
@@ -45,9 +51,19 @@ export function AdminLayout({ children }) {
         </button>
       </aside>
 
-      <button onClick={() => setSidebarOpen(o=>!o)} className="md:hidden fixed bottom-4 right-4 z-50 w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-lg">
-        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      <div className="lg:hidden sticky top-16 z-30 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 h-12 flex items-center">
+        <button 
+          onClick={() => setSidebarOpen(true)} 
+          className="p-2 -ml-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+          aria-label="Buka menu"
+        >
+          <Menu size={20} />
+        </button>
+        
+        <div className="flex-1 text-center font-medium text-sm text-gray-900 dark:text-white">
+          {getPageTitle(location.pathname)}
+        </div>
+      </div>
       {sidebarOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setSidebarOpen(false)}>
           <div className="bg-white dark:bg-gray-900 w-56 h-full px-3 py-4 pt-20 overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -60,7 +76,7 @@ export function AdminLayout({ children }) {
         </div>
       )}
 
-      <main className="md:pl-56 px-4 md:px-6 py-6 max-w-7xl">
+      <main className="lg:pl-64 px-4 lg:px-8 py-6 max-w-[calc(100%-16rem)] lg:max-w-none">
         {children}
       </main>
     </div>

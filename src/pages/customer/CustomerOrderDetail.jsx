@@ -95,12 +95,11 @@ export function CustomerOrderDetail() {
           </Card>
         )}
         {(order.escrow === 'progress' || order.status === 'progress') && (
-          <Card className="p-5 mb-4">
-            <Button variant="outline" className="w-full" onClick={() => setShowDisputeModal(true)}>
-              <AlertTriangle size={16} className="mr-2" />
-              Ajukan Dispute
-            </Button>
-          </Card>
+          <div className="flex justify-center mt-1">
+            <button onClick={() => setShowDisputeModal(true)} className="text-xs text-gray-400 hover:text-red-500 transition-colors">
+              <AlertTriangle size={12} className="inline mr-1" />Ajukan Dispute
+            </button>
+          </div>
         )}
       </div>
       <WriteReviewModal 

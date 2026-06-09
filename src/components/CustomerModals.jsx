@@ -3,7 +3,8 @@ import toast from 'react-hot-toast'
 import { Star, X, Upload } from 'lucide-react'
 import { Card, Button, Input } from './UI'
 
-export function WriteReviewModal({ order, onClose, onSubmit }) {
+export function WriteReviewModal({ isOpen, order, onClose, onSubmit }) {
+  if (!isOpen) return null
   const [rating, setRating] = useState(5)
   const [text, setText] = useState('')
   
@@ -56,7 +57,8 @@ export function WriteReviewModal({ order, onClose, onSubmit }) {
   )
 }
 
-export function PaymentConfirmationModal({ order, method, onClose, onConfirm }) {
+export function PaymentConfirmationModal({ isOpen, order, method, onClose, onConfirm }) {
+  if (!isOpen) return null
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <Card className="max-w-md w-full" onClick={e => e.stopPropagation()}>
@@ -105,7 +107,8 @@ export function PaymentConfirmationModal({ order, method, onClose, onConfirm }) 
   )
 }
 
-export function DisputeFormModal({ order, onClose, onSubmit }) {
+export function DisputeFormModal({ isOpen, order, onClose, onSubmit }) {
+  if (!isOpen) return null
   const [reason, setReason] = useState('')
   const [evidence, setEvidence] = useState('')
   

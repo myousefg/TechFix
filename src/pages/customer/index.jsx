@@ -7,7 +7,7 @@ import { technicians, services, maintenancePlans } from '../../data'
 import { getSubscription, saveSubscription, getOrders, addOrder, updateOrder, getAccountSettings, getNotifications, markNotifsRead, saveSession, loadSession, removeSession, remove, calculateDistance, getUserLocation, getCurrentCustomer, getOrdersByCustomerId } from '../../store'
 import { PaymentConfirmationModal } from '../../components/CustomerModals'
 
-function CustomerLayout({ children, activeTab }) {
+export function CustomerLayout({ children, activeTab }) {
   const navigate = useNavigate()
   const tabs = [
     { id: 'home',     icon: Search,   label: 'Cari Teknisi', path: '/customer' },

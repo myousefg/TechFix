@@ -114,6 +114,7 @@ export function EscrowStatus({ status }) {
   const states = {
     waiting:   { label: 'Menunggu Konfirmasi',   color: 'orange' },
     progress:  { label: 'Servis Berlangsung',     color: 'blue'   },
+    ready:     { label: 'Siap Diambil',           color: 'green'  },
     done:      { label: 'Selesai – Dana Dikirim', color: 'green'  },
     refunded:  { label: 'Dana Dikembalikan',      color: 'gray'   },
   }

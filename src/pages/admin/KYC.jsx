@@ -14,7 +14,7 @@ export function AdminKYC() {
 
   return (
     <AdminLayout>
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
+      <button onClick={() => navigate("/admin")} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
         <ArrowLeft size={16} /> Kembali
       </button>
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-2">Review KYC Teknisi</h1>

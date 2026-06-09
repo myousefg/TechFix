@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Star, CheckCircle, XCircle, AlertTriangle, Edit, Ban, MessageCircle, DollarSign, TrendingUp, TrendingDown, Image as ImageIcon, BarChart2, Eye, EyeOff, Trash2, CheckCheck, Send, Briefcase, FileText, ExternalLink, UserX, UserCheck } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, Star, CheckCircle, XCircle, AlertTriangle, Edit, Ban, MessageCircle, DollarSign, TrendingUp, TrendingDown, Image as ImageIcon, BarChart2, Eye, EyeOff, Trash2, CheckCheck, Send, Briefcase, FileText, ExternalLink, UserX, UserCheck, X } from 'lucide-react'
 import { Card, Badge, Button } from '../../components/UI'
-import { getCustomerById, getTechnicianById, getOrders, getKYCRequests, getReviews, getAdCampaignById, getPartnerById, getSupportTickets, updateReviewStatus, updateTicketStatus, addTicketReply } from '../../store'
+import { getCustomerById, getTechnicianById, getOrders, getKYCRequests, getReviews, getAdCampaignById, getPartnerById, getSupportTickets, updateReviewStatus, updateTicketStatus, addTicketReply, updateCustomer, addAuditLog } from '../../store'
 import toast from 'react-hot-toast'
+import { AdminLayout } from './index'
 
 function Stat({ label, value, sub, accent = 'text-gray-900 dark:text-white' }) {
   return (
@@ -32,10 +33,10 @@ function CustomerDetail() {
   const [tab, setTab] = useState('profile')
   if (!customer) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+      <AdminLayout>
+        <Button variant="ghost" onClick={() => navigate('/admin/users')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
         <Card className="p-8 mt-4 text-center"><p className="text-gray-500">Pelanggan tidak ditemukan</p></Card>
-      </div>
+      </AdminLayout>
     )
   }
   const orders = getOrders().filter(o => o.customerId === customer.id || o.customer === customer.name)
@@ -50,9 +51,10 @@ function CustomerDetail() {
     { id: 'activity', label: `Aktivitas (${tickets.length})` },
   ]
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <AdminLayout>
+    <div className="max-w-5xl">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <Button variant="ghost" onClick={() => navigate('/admin/users')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
         <span className="text-gray-300">/</span>
         <Link to="/admin/users" className="text-sm text-gray-500 hover:text-brand-500">Pengguna</Link>
         <span className="text-gray-300">/</span>
@@ -171,6 +173,7 @@ function CustomerDetail() {
         </div>
       )}
     </div>
+    </AdminLayout>
   )
 }
 
@@ -181,15 +184,15 @@ function TechnicianDetail() {
   const [tab, setTab] = useState('profile')
   if (!tech) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+      <AdminLayout>
+        <Button variant="ghost" onClick={() => navigate('/admin/users')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
         <Card className="p-8 mt-4 text-center"><p className="text-gray-500">Teknisi tidak ditemukan</p></Card>
-      </div>
+      </AdminLayout>
     )
   }
   const orders = getOrders().filter(o => o.techId === tech.id || o.tech === tech.name)
   const reviews = getReviews().filter(r => r.techId === tech.id)
-  const kyc = getKYCRequests().find(k => k.name === tech.name)
+  const kyc = getKYCRequests().find(k => k.techId === tech.id || k.techName === tech.name)
   const completed = orders.filter(o => o.status === 'done').length
   const revenue = orders.filter(o => o.status === 'done').reduce((s, o) => s + (o.amount || 0), 0)
   const tabs = [
@@ -200,9 +203,10 @@ function TechnicianDetail() {
     { id: 'kyc',      label: 'KYC' },
   ]
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <AdminLayout>
+    <div className="max-w-5xl">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <Button variant="ghost" onClick={() => navigate('/admin/users')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
         <span className="text-gray-300">/</span>
         <Link to="/admin/users" className="text-sm text-gray-500 hover:text-brand-500">Pengguna</Link>
         <span className="text-gray-300">/</span>
@@ -329,6 +333,7 @@ function TechnicianDetail() {
         </Card>
       )}
     </div>
+    </AdminLayout>
   )
 }
 
@@ -338,10 +343,10 @@ function CampaignDetail() {
   const campaign = getAdCampaignById(id)
   if (!campaign) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+      <AdminLayout>
+        <Button variant="ghost" onClick={() => navigate('/admin/ads/manage')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
         <Card className="p-8 mt-4 text-center"><p className="text-gray-500">Kampanye tidak ditemukan</p></Card>
-      </div>
+      </AdminLayout>
     )
   }
   const partner = getPartnerById(campaign.partnerId)
@@ -349,9 +354,10 @@ function CampaignDetail() {
   const convRate = campaign.clicks > 0 ? ((campaign.conversions / campaign.clicks) * 100).toFixed(2) : 0
   const maxDaily = Math.max(...(campaign.dailyStats || []).map(d => d.impressions), 1)
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <AdminLayout>
+    <div className="max-w-5xl">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <Button variant="ghost" onClick={() => navigate('/admin/ads/manage')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
         <span className="text-gray-300">/</span>
         <Link to="/admin/ads/manage" className="text-sm text-gray-500 hover:text-brand-500">Kampanye</Link>
         <span className="text-gray-300">/</span>
@@ -398,6 +404,7 @@ function CampaignDetail() {
         </Card>
       )}
     </div>
+    </AdminLayout>
   )
 }
 
@@ -407,20 +414,21 @@ function PartnerDetail() {
   const partner = getPartnerById(id)
   if (!partner) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+      <AdminLayout>
+        <Button variant="ghost" onClick={() => navigate('/admin/ads')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
         <Card className="p-8 mt-4 text-center"><p className="text-gray-500">Partner tidak ditemukan</p></Card>
-      </div>
+      </AdminLayout>
     )
   }
   const campaigns = partner.campaigns || []
   const totalRevenue = campaigns.reduce((s, c) => s + (c.spend || 0), 0)
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <AdminLayout>
+    <div className="max-w-5xl">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <Button variant="ghost" onClick={() => navigate('/admin/ads')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
         <span className="text-gray-300">/</span>
-        <Link to="/admin/ads/partners" className="text-sm text-gray-500 hover:text-brand-500">Partner</Link>
+        <Link to="/admin/ads" className="text-sm text-gray-500 hover:text-brand-500">Iklan & Partner</Link>
         <span className="text-gray-300">/</span>
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{partner.name}</span>
       </div>
@@ -471,6 +479,7 @@ function PartnerDetail() {
         )}
       </Card>
     </div>
+    </AdminLayout>
   )
 }
 
@@ -502,9 +511,10 @@ function ReviewsModeration() {
     setSelected(null)
   }
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <AdminLayout>
+    <div className="max-w-5xl">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <Button variant="ghost" onClick={() => navigate('/admin')}><ArrowLeft size={16} className="mr-1" />Dashboard</Button>
         <span className="text-gray-300">/</span>
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Moderasi Review</span>
       </div>
@@ -550,6 +560,7 @@ function ReviewsModeration() {
         )}
       </Card>
     </div>
+    </AdminLayout>
   )
 }
 
@@ -584,9 +595,10 @@ function SupportTickets() {
     setSelected(tickets.find(t => t.id === selected.id))
   }
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <AdminLayout>
+    <div className="max-w-5xl">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate(-1)}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <Button variant="ghost" onClick={() => navigate('/admin')}><ArrowLeft size={16} className="mr-1" />Dashboard</Button>
         <span className="text-gray-300">/</span>
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Support Tickets</span>
       </div>
@@ -661,6 +673,7 @@ function SupportTickets() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   )
 }
 

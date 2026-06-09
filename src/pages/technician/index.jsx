@@ -312,21 +312,25 @@ export function TechnicianEarnings() {
   const tech = getCurrentTechnician()
   const earnings = getTechnicianEarnings(tech.id)
 
-  const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
   const now = new Date()
   const recentMonths = []
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    recentMonths.push(d.toLocaleString('id', { month: 'short' }))
+    recentMonths.push(d.toLocaleString('id-ID', { month: 'short' }))
   }
   const monthMap = Object.fromEntries((earnings.byMonth || []).map(d => [d.month, d.amount]))
   const chartData = recentMonths.map(m => ({ month: m, amount: monthMap[m] || 0 }))
-  const months = chartData.map(d => d.month)
   const vals = chartData.map(d => d.amount / 1000)
   const maxVal = Math.max(...vals, 1)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
 
+  // Saldo: 90% dari total (10% komisi platform), minus sudah dicairkan sebelumnya (simulasi 60%)
+  const saldoNetto = Math.round(earnings.total * 0.9)
+  const alreadyWithdrawn = Math.round(saldoNetto * 0.6)
+  const availableBalance = saldoNetto - alreadyWithdrawn
+
   function handleWithdraw({ amount, method, accountNumber }) {
+    toast.success(`Pencairan Rp${Number(amount).toLocaleString('id')} ke ${method} berhasil diajukan!`)
     setShowWithdrawModal(false)
   }
   
@@ -335,44 +339,75 @@ export function TechnicianEarnings() {
       <div className="py-6">
         <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Penghasilan</h1>
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <StatCard label="Bulan Ini" value={`Rp${(earnings.thisMonth / 1000).toFixed(0)}rb`} sub={`${earnings.completed} order selesai`} icon={DollarSign} color="teal" />
-          <StatCard label="Total 2026" value={earnings.total >= 1000000 ? `Rp${(earnings.total / 1000000).toFixed(1).replace('.0','')}jt` : `Rp${(earnings.total / 1000).toFixed(0)}rb`} sub="↑ dari tahun lalu" icon={TrendingUp} color="green" />
+          <StatCard label="Bulan Ini" value={earnings.thisMonth > 0 ? `Rp${(earnings.thisMonth / 1000).toFixed(0)}rb` : 'Rp0'} sub={`${earnings.completed} order selesai`} icon={DollarSign} color="teal" />
+          <StatCard label="Total 2026" value={earnings.total >= 1000000 ? `Rp${(earnings.total / 1000000).toFixed(1).replace('.0','')}jt` : `Rp${(earnings.total / 1000).toFixed(0)}rb`} sub={`${earnings.completed} order`} icon={TrendingUp} color="green" />
         </div>
 
         <Card className="p-5 mb-4">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Tren Penghasilan (ribu Rp)</h3>
-          <div className="flex items-end gap-2 h-32">
-            {vals.map((v, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <div className="w-full rounded-t-lg bg-teal-500/80 dark:bg-teal-500/60 transition-all"
-                  style={{ height: `${Math.max(v > 0 ? (v / maxVal) * 100 : 0, 6)}%` }} />
-                <span className="text-xs text-gray-400">{months[i]}</span>
-              </div>
-            ))}
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Tren Penghasilan (6 Bulan)</h3>
+          <p className="text-xs text-gray-400 mb-4">dalam ribuan Rp</p>
+          {vals.every(v => v === 0) ? (
+            <div className="flex items-center justify-center h-32 text-gray-400 text-sm">Belum ada data penghasilan</div>
+          ) : (
+            <div className="flex items-end gap-2 h-32">
+              {chartData.map((d, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div
+                    className={`w-full rounded-t-lg transition-all ${vals[i] > 0 ? 'bg-teal-500 dark:bg-teal-400' : 'bg-gray-200 dark:bg-gray-700'}`}
+                    style={{ height: `${Math.max(vals[i] > 0 ? (vals[i] / maxVal) * 100 : 4, 4)}%` }}
+                    title={`Rp${d.amount.toLocaleString('id')}`}
+                  />
+                  <span className={`text-xs ${d.month === recentMonths[5] ? 'text-teal-500 font-semibold' : 'text-gray-400'}`}>{d.month}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-500">
+            <span>Rata-rata: Rp{earnings.completed > 0 ? Math.round(earnings.total / earnings.completed).toLocaleString('id') : 0}/order</span>
+            <span>{earnings.completed} order selesai</span>
           </div>
-         </Card>
+        </Card>
 
-         <Card className="p-5">
-           <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Pencairan Dana</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Saldo tersedia: <span className="font-semibold text-gray-900 dark:text-white">Rp{earnings.thisMonth.toLocaleString('id')}</span></p>
+        <Card className="p-5">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Pencairan Dana</h3>
+          <p className="text-xs text-gray-400 mb-4">Setelah dipotong komisi platform 10%</p>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="p-3 rounded-xl bg-teal-50 dark:bg-teal-900/20">
+              <p className="text-xs text-teal-600 dark:text-teal-400">Saldo Tersedia</p>
+              <p className="text-xl font-display font-700 text-teal-700 dark:text-teal-300">Rp{availableBalance.toLocaleString('id')}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
+              <p className="text-xs text-gray-500">Sudah Dicairkan</p>
+              <p className="text-xl font-display font-700 text-gray-700 dark:text-gray-300">Rp{alreadyWithdrawn.toLocaleString('id')}</p>
+            </div>
+          </div>
           <div className="space-y-2 mb-4">
-            {[{m:'Transfer Bank (BCA)', a:`Rp${earnings.thisMonth.toLocaleString('id')}`},{m:'OVO',a:'Rp0'}].map(x=>(
-              <label key={x.m} className="flex items-center gap-3 cursor-pointer">
-                <input type="radio" name="withdraw" className="accent-teal-500" />
-                <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">{x.m}</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">{x.a}</span>
+            <p className="text-xs text-gray-500 font-medium">Metode Pencairan</p>
+            {[
+              { m: 'Transfer Bank (BCA - •••• 1234)', icon: '🏦' },
+              { m: 'OVO (+62 812 •••• 0079)', icon: '💜' },
+            ].map((x, idx) => (
+              <label key={x.m} className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-teal-400 transition-colors">
+                <input type="radio" name="withdraw" defaultChecked={idx === 0} className="accent-teal-500" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">{x.icon} {x.m}</span>
               </label>
             ))}
           </div>
-          <Button variant="teal" className="w-full" onClick={() => setShowWithdrawModal(true)}>Cairkan Dana</Button>
+          <Button 
+            variant="teal" 
+            className="w-full" 
+            onClick={() => availableBalance > 0 ? setShowWithdrawModal(true) : toast.error('Saldo tidak mencukupi')}
+          >
+            Cairkan Dana
+          </Button>
         </Card>
       </div>
-  <WithdrawModal
-isOpen={showWithdrawModal}
-onClose={() => setShowWithdrawModal(false)}
-balance={earnings.thisMonth}
-onSubmit={handleWithdraw}
-/>
+      <WithdrawModal
+        isOpen={showWithdrawModal}
+        onClose={() => setShowWithdrawModal(false)}
+        balance={availableBalance}
+        onSubmit={handleWithdraw}
+      />
     </TechLayout>
   )
 }

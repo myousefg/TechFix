@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { X, Download, Send, Check, X as XIcon, Edit, Image as ImageIcon, Eye, Trash2, CheckCheck, MoreVertical, TrendingUp, Star, Award, Briefcase, DollarSign, Activity, Users, MessageCircle, Shield, Megaphone } from 'lucide-react'
 import { Card, Badge, Button } from '../../components/UI'
 import toast from 'react-hot-toast'
@@ -110,6 +111,7 @@ export function TopTechsLeaderboard({ limit = 5 }) {
 }
 
 export function ActivityFeed({ limit = 8 }) {
+  const navigate = useNavigate()
   const events = [
     { type: 'order',     icon: Briefcase,  color: 'text-blue-500 bg-blue-50 dark:bg-blue-900/30',  text: 'Order TF-011 dibuat',                 sub: 'Muhammad Hashfi · 1 menit lalu',  path: '/admin/transactions/TF-011' },
     { type: 'kyc',       icon: Shield,     color: 'text-green-500 bg-green-50 dark:bg-green-900/30', text: 'KYC disetujui: Linda Permata',       sub: '5 menit lalu',                     path: '/admin/kyc/5' },
@@ -124,13 +126,13 @@ export function ActivityFeed({ limit = 8 }) {
     <Card className="p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2"><Activity size={16} className="text-brand-500" />Aktivitas Terbaru</h3>
-        <a href="/admin/audit" className="text-xs text-brand-500 hover:underline">Lihat semua</a>
+        <button onClick={() => navigate('/admin/audit')} className="text-xs text-brand-500 hover:underline">Lihat semua</button>
       </div>
       <div className="space-y-2">
         {events.map((e, i) => {
           const Icon = e.icon
           return (
-            <a key={i} href={e.path} className="flex items-start gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+            <button key={i} onClick={() => navigate(e.path)} className="w-full flex items-start gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${e.color}`}>
                 <Icon size={14} />
               </div>
@@ -138,7 +140,7 @@ export function ActivityFeed({ limit = 8 }) {
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{e.text}</p>
                 <p className="text-xs text-gray-500">{e.sub}</p>
               </div>
-            </a>
+            </button>
           )
         })}
       </div>

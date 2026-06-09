@@ -476,16 +476,30 @@ export function getTechnicianEarnings(techId) {
   const orders = getOrdersByTechId(techId).filter(o => o.status === 'done')
   const total = orders.reduce((sum, o) => sum + (o.amount || 0), 0)
   
-  // Group by month
+  // Group by month using consistent date parsing
   const byMonth = {}
   orders.forEach(o => {
     const dateStr = o.createdAt || o.date
-    const month = new Date(dateStr).toLocaleString('id', { month: 'short' })
+    let month
+    try {
+      // Handle both '2026-05-18' and '20 Mei 2026' formats
+      if (dateStr && dateStr.includes('-')) {
+        const d = new Date(dateStr)
+        month = d.toLocaleString('id-ID', { month: 'short' })
+      } else {
+        // Parse Indonesian date like '20 Mei 2026'
+        const monthMap = { Jan:'Jan', Feb:'Feb', Mar:'Mar', Apr:'Apr', Mei:'Mei', Jun:'Jun', Jul:'Jul', Agu:'Agu', Sep:'Sep', Okt:'Okt', Nov:'Nov', Des:'Des' }
+        const parts = (dateStr || '').split(' ')
+        month = monthMap[parts[1]] || parts[1]
+      }
+    } catch {
+      month = '?'
+    }
     byMonth[month] = (byMonth[month] || 0) + (o.amount || 0)
   })
   
   // Current month
-  const currentMonth = new Date().toLocaleString('id', { month: 'short' })
+  const currentMonth = new Date().toLocaleString('id-ID', { month: 'short' })
   const thisMonth = byMonth[currentMonth] || 0
   
   return {

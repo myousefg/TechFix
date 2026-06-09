@@ -48,7 +48,7 @@ export function AdminSettings() {
 
   return (
     <AdminLayout>
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
+      <button onClick={() => navigate('/admin')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
         <ArrowLeft size={16} /> Kembali
       </button>
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Pengaturan Admin</h1>
@@ -85,7 +85,7 @@ export function AdminSettings() {
               </select>
             </div>
           </div>
-          <div className="mt-5">
+          <div className="mt-5 flex justify-end">
             <Button onClick={handleSaveProfile}><Save size={16} /> Simpan Profil</Button>
           </div>
         </Card>
@@ -100,7 +100,7 @@ export function AdminSettings() {
             <Input type="password" label="Password Baru" value={pwd.next} onChange={e => setPwd({ ...pwd, next: e.target.value })} placeholder="Minimal 8 karakter" />
             <Input type="password" label="Konfirmasi Password Baru" value={pwd.confirm} onChange={e => setPwd({ ...pwd, confirm: e.target.value })} placeholder="Ulangi password baru" />
           </div>
-          <div className="mt-5">
+          <div className="mt-5 flex justify-end">
             <Button onClick={handleChangePassword}>Ubah Password</Button>
           </div>
         </Card>

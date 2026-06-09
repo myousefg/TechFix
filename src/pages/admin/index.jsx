@@ -30,20 +30,21 @@ export function AdminLayout({ children }) {
     { icon: SettingsIcon, label: 'Settings',             path: '/admin/settings' },
   ]
 
-  const getPageTitle = (pathname) => {
-    if (pathname === '/admin' || pathname === '/admin/') return 'Dashboard Admin'
-    const link = links.find(l => pathname.startsWith(l.path) && l.path !== '/admin')
-    return link ? link.label : 'Admin'
+  const isActive = (l) => {
+    if (l.path === '/admin') return location.pathname === '/admin'
+    return location.pathname.startsWith(l.path)
   }
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
       <Toaster position="top-right" />
+
+      {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col fixed left-0 top-16 bottom-0 w-56 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-4 z-30">
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Admin Panel</p>
         <nav className="space-y-0.5 flex-1 overflow-y-auto">
           {links.map(l => (
-            <SidebarLink key={l.path} icon={l.icon} label={l.label} path={l.path} active={location.pathname.startsWith(l.path) && (l.path !== '/admin' || location.pathname === '/admin')} onClick={() => navigate(l.path)} />
+            <SidebarLink key={l.path} icon={l.icon} label={l.label} path={l.path} active={isActive(l)} onClick={() => navigate(l.path)} />
           ))}
         </nav>
         <button onClick={() => navigate('/')} className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 font-medium rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20">
@@ -51,32 +52,32 @@ export function AdminLayout({ children }) {
         </button>
       </aside>
 
-      <div className="lg:hidden sticky top-16 z-30 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 h-12 flex items-center">
-        <button 
-          onClick={() => setSidebarOpen(true)} 
-          className="p-2 -ml-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-          aria-label="Buka menu"
-        >
-          <Menu size={20} />
-        </button>
-        
-        <div className="flex-1 text-center font-medium text-sm text-gray-900 dark:text-white">
-          {getPageTitle(location.pathname)}
-        </div>
-      </div>
+      {/* Mobile: hamburger button in top-left (below navbar) */}
+      <button
+        onClick={() => setSidebarOpen(o => !o)}
+        className="md:hidden fixed top-[64px] left-0 z-50 w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-900 border-b border-r border-gray-200 dark:border-gray-800"
+        aria-label="Menu"
+      >
+        {sidebarOpen ? <X size={20} className="text-gray-700 dark:text-gray-300" /> : <Menu size={20} className="text-gray-700 dark:text-gray-300" />}
+      </button>
+
+      {/* Mobile sidebar drawer */}
       {sidebarOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setSidebarOpen(false)}>
           <div className="bg-white dark:bg-gray-900 w-56 h-full px-3 py-4 pt-20 overflow-y-auto" onClick={e => e.stopPropagation()}>
             <nav className="space-y-0.5">
               {links.map(l => (
-                <SidebarLink key={l.path} icon={l.icon} label={l.label} path={l.path} active={location.pathname.startsWith(l.path)} onClick={() => { navigate(l.path); setSidebarOpen(false) }} />
+                <SidebarLink key={l.path} icon={l.icon} label={l.label} path={l.path} active={isActive(l)} onClick={() => { navigate(l.path); setSidebarOpen(false) }} />
               ))}
             </nav>
+            <button onClick={() => navigate('/')} className="flex items-center gap-2 px-3 py-2 mt-4 text-sm text-red-500 font-medium rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 w-full">
+              <LogOut size={16} /> Keluar
+            </button>
           </div>
         </div>
       )}
 
-      <main className="lg:pl-64 px-4 lg:px-8 py-6 max-w-[calc(100%-16rem)] lg:max-w-none">
+      <main className="md:pl-56 px-4 md:px-6 py-6 max-w-7xl">
         {children}
       </main>
     </div>
@@ -386,7 +387,6 @@ export function AdminUsers() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('teknisi')
   const [query, setQuery] = useState('')
-  const [selectedCustomer, setSelectedCustomer] = useState(null)
   const customers = getCustomers()
   const kycRequests = getKYCRequests()
 
@@ -538,109 +538,7 @@ export function AdminUsers() {
         </Card>
       )}
 
-      {selectedCustomer && (
-        <CustomerDetailModal customer={selectedCustomer} onClose={() => setSelectedCustomer(null)} />
-      )}
     </AdminLayout>
-  )
-}
-
-function CustomerDetailModal({ customer, onClose }) {
-  const orders = getCustomerOrders(customer.name)
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-accent-100 dark:bg-accent-900/30 flex items-center justify-center text-accent-600 dark:text-accent-400 font-display font-700 text-lg">
-              {customer.name.charAt(0)}
-            </div>
-            <div>
-              <h2 className="font-display text-xl font-700 text-gray-900 dark:text-white">{customer.name}</h2>
-              <p className="text-sm text-gray-500">{customer.email}</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="p-4">
-              <p className="text-xs text-gray-400 mb-1">Telepon</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{customer.phone}</p>
-            </Card>
-            <Card className="p-4">
-              <p className="text-xs text-gray-400 mb-1">Kota</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{customer.city}</p>
-            </Card>
-            <Card className="p-4">
-              <p className="text-xs text-gray-400 mb-1">Bergabung</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{customer.joined}</p>
-            </Card>
-            <Card className="p-4">
-              <p className="text-xs text-gray-400 mb-1">Status</p>
-              <Badge color={customer.status === 'active' ? 'green' : 'red'}>
-                {customer.status === 'active' ? 'Aktif' : 'Suspended'}
-              </Badge>
-            </Card>
-          </div>
-
-          <Card className="p-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Statistik</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-gray-400">Total Order</p>
-                <p className="text-2xl font-display font-700 text-gray-900 dark:text-white">{customer.orders}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">Total Belanja</p>
-                <p className="text-2xl font-display font-700 text-gray-900 dark:text-white">Rp{customer.totalSpent.toLocaleString('id')}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card>
-            <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Riwayat Order ({orders.length})</h3>
-            </div>
-            {orders.length === 0 ? (
-              <EmptyState icon={Package} title="Belum ada order" desc="Customer ini belum pernah order" />
-            ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {orders.map(o => (
-                  <div key={o.id} className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white text-sm">{o.service}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">dengan {o.tech} • {o.date}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-gray-900 dark:text-white">Rp{o.amount.toLocaleString('id')}</p>
-                      <Badge color={o.status === 'done' ? 'green' : o.status === 'progress' ? 'blue' : 'orange'}>
-                        {o.status === 'done' ? 'Selesai' : o.status === 'progress' ? 'Berlangsung' : 'Menunggu'}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-
-          <div className="flex gap-3">
-            {customer.status === 'active' ? (
-              <Button variant="danger" className="flex-1" onClick={() => { addAuditLog({ actor: 'Admin', action: 'suspend_customer', target: customer.name }); toast.success('Customer disuspend'); onClose() }}>
-                Suspend Akun
-              </Button>
-            ) : (
-              <Button className="flex-1" onClick={() => { addAuditLog({ actor: 'Admin', action: 'activate_customer', target: customer.name }); toast.success('Customer diaktifkan kembali'); onClose() }}>
-                Aktifkan Akun
-              </Button>
-            )}
-            <Button variant="outline" onClick={onClose} className="flex-1">Tutup</Button>
-          </div>
-        </div>
-      </div>
-    </div>
   )
 }
 

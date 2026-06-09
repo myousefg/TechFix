@@ -4,8 +4,8 @@ import toast from 'react-hot-toast'
 import { Home, Package, TrendingUp, Star, Settings, LogOut, CheckCircle, ChevronRight, ArrowLeft, Upload, Camera, DollarSign, Clock, Search } from 'lucide-react'
 import { Card, Badge, Button, Input, EscrowStatus, StatCard, EmptyState } from '../../components/UI'
 import { TechnicianOrderDetail } from '../../components/TechnicianOrderDetail'
-import { getOrders, updateOrder, saveSession, loadSession, removeSession, getTechnicianProfile, saveTechnicianProfile, getCurrentTechnicianId, getCurrentTechnician, getOrdersByTechId, getTechnicianEarnings, getKYCRequests } from '../../store'
-import { WithdrawModal, UpgradePremiumModal } from '../../components/TechnicianModals'
+import { getOrders, updateOrder, saveSession, loadSession, removeSession, getTechnicianProfile, saveTechnicianProfile, getCurrentTechnicianId, getCurrentTechnician, getOrdersByTechId, getTechnicianEarnings, getKYCRequests, submitKYC, getSubscription, saveSubscription } from '../../store'
+import { WithdrawModal, UpgradePremiumModal, KYCSubmissionModal } from '../../components/TechnicianModals'
 
 function TechLayout({ children, activeTab }) {
   const navigate = useNavigate()
@@ -54,6 +54,17 @@ export function TechnicianRegister() {
   }
   function handleSubmitKYC() {
     saveTechnicianProfile({ name: form.name, kycStatus: 'pending' })
+    if (form.name && form.ktp) {
+      submitKYC({
+        techId: Date.now(),
+        techName: form.name,
+        specialty: form.specialties?.[0] || 'General',
+        ktpNumber: form.ktp,
+        ktpPhotoUrl: 'https://placehold.co/400x250/3b82f6/white?text=KTP',
+        selfiePhotoUrl: 'https://placehold.co/300x300/10b981/white?text=Selfie',
+        docs: ['KTP'],
+      })
+    }
     goToStep(4)
   }
   function handleFinish() {
@@ -151,14 +162,10 @@ export function TechnicianDashboard() {
   const navigate = useNavigate()
   const tech = getCurrentTechnician()
   const myOrders = getOrdersByTechId(tech.id)
-  const completed = myOrders.filter(o => o.status === 'done')
-  const totalEarnings = completed.reduce((sum, o) => sum + (o.amount || 0), 0)
-  const formattedEarnings = totalEarnings >= 1000000
-    ? `Rp${(totalEarnings / 1000000).toFixed(1).replace('.0','')}jt`
-    : `Rp${totalEarnings.toLocaleString('id')}`
+  const earnings = getTechnicianEarnings(tech.id)
 
   const kycApps = getKYCRequests()
-  const kycData = kycApps.find(k => k.name === tech.name) || null
+  const kycData = kycApps.find(k => k.techId === tech?.id || k.techName === tech?.name) || null
   const kycStatus = kycData ? kycData.status : null
 
   const pending = myOrders.filter(o => o.status === 'waiting' || o.status === 'progress')
@@ -195,8 +202,8 @@ export function TechnicianDashboard() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <StatCard label="Penghasilan Bulan Ini" value={formattedEarnings} sub={`${completed.length} order selesai`} icon={DollarSign} color="teal" />
-          <StatCard label="Order Selesai" value={String(completed.length)} sub="Semua waktu" icon={CheckCircle} color="green" />
+          <StatCard label="Penghasilan Bulan Ini" value={`Rp${(earnings.thisMonth / 1000).toFixed(0)}rb`} sub={`${earnings.completed} order selesai`} icon={DollarSign} color="teal" />
+          <StatCard label="Order Selesai" value={String(earnings.completed)} sub="Semua waktu" icon={CheckCircle} color="green" />
           <StatCard label="Order Aktif" value={String(pending.length)} sub="Menunggu tindakan" icon={Package} color="orange" />
           <StatCard label="Total Order" value={String(myOrders.length)} sub="Termasuk selesai" icon={Star} color="blue" />
         </div>
@@ -304,12 +311,21 @@ export function TechnicianOrders() {
 export function TechnicianEarnings() {
   const tech = getCurrentTechnician()
   const earnings = getTechnicianEarnings(tech.id)
-  const chartData = earnings.byMonth.slice(-6)
+
+  const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  const now = new Date()
+  const recentMonths = []
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    recentMonths.push(d.toLocaleString('id', { month: 'short' }))
+  }
+  const monthMap = Object.fromEntries((earnings.byMonth || []).map(d => [d.month, d.amount]))
+  const chartData = recentMonths.map(m => ({ month: m, amount: monthMap[m] || 0 }))
   const months = chartData.map(d => d.month)
   const vals = chartData.map(d => d.amount / 1000)
   const maxVal = Math.max(...vals, 1)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
-  
+
   function handleWithdraw({ amount, method, accountNumber }) {
     setShowWithdrawModal(false)
   }
@@ -319,8 +335,8 @@ export function TechnicianEarnings() {
       <div className="py-6">
         <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Penghasilan</h1>
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <StatCard label="Bulan Ini" value={`Rp${(earnings.thisMonth / 1000).toFixed(1).replace('.0','')}jt`} sub={`${earnings.completed} order selesai`} icon={DollarSign} color="teal" />
-          <StatCard label="Total 2026" value={`Rp${(earnings.total / 1000000).toFixed(1).replace('.0','')}jt`} sub="↑ dari tahun lalu" icon={TrendingUp} color="green" />
+          <StatCard label="Bulan Ini" value={`Rp${(earnings.thisMonth / 1000).toFixed(0)}rb`} sub={`${earnings.completed} order selesai`} icon={DollarSign} color="teal" />
+          <StatCard label="Total 2026" value={earnings.total >= 1000000 ? `Rp${(earnings.total / 1000000).toFixed(1).replace('.0','')}jt` : `Rp${(earnings.total / 1000).toFixed(0)}rb`} sub="↑ dari tahun lalu" icon={TrendingUp} color="green" />
         </div>
 
         <Card className="p-5 mb-4">
@@ -329,15 +345,15 @@ export function TechnicianEarnings() {
             {vals.map((v, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
                 <div className="w-full rounded-t-lg bg-teal-500/80 dark:bg-teal-500/60 transition-all"
-                  style={{ height: `${(v / maxVal) * 100}%` }} />
+                  style={{ height: `${Math.max(v > 0 ? (v / maxVal) * 100 : 0, 6)}%` }} />
                 <span className="text-xs text-gray-400">{months[i]}</span>
               </div>
             ))}
           </div>
-        </Card>
+         </Card>
 
-        <Card className="p-5">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Pencairan Dana</h3>
+         <Card className="p-5">
+           <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Pencairan Dana</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Saldo tersedia: <span className="font-semibold text-gray-900 dark:text-white">Rp{earnings.thisMonth.toLocaleString('id')}</span></p>
           <div className="space-y-2 mb-4">
             {[{m:'Transfer Bank (BCA)', a:`Rp${earnings.thisMonth.toLocaleString('id')}`},{m:'OVO',a:'Rp0'}].map(x=>(
@@ -366,9 +382,14 @@ export function TechnicianSettings() {
   const navigate = useNavigate()
   const tech = getCurrentTechnician()
   const kycApps = getKYCRequests()
-  const kycData = kycApps.find(k => k.name === tech.name) || null
+  const kycData = kycApps.find(k => k.techId === tech?.id || k.techName === tech?.name) || null
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState(null)
+  const [currentPlanId, setCurrentPlanId] = useState(() => {
+    const sub = getSubscription()
+    return sub?.id || 'basic'
+  })
+  const [showKYCModal, setShowKYCModal] = useState(false)
   const plans = [
     { id: 'basic', name: 'Basic', price: 50000, desc: 'Tampil di halaman pencarian' },
     { id: 'gold', name: 'Gold', price: 100000, desc: 'Prioritas di halaman depan', popular: true },
@@ -390,8 +411,23 @@ export function TechnicianSettings() {
   }
   
   function handleUpgradeConfirm() {
-    toast.success(`Upgrade ke ${selectedPlan.name} berhasil!`)
+    if (selectedPlan) {
+      setCurrentPlanId(selectedPlan.id)
+      saveSubscription(selectedPlan)
+      toast.success(`Upgrade ke ${selectedPlan.name} berhasil!`)
+    }
     setShowUpgradeModal(false)
+  }
+
+  function handleKYCSubmit(data) {
+    submitKYC({
+      techId: tech.id,
+      techName: tech.name,
+      specialty: tech.specialty,
+      ...data,
+    })
+    toast.success('KYC berhasil diajukan. Menunggu review admin.')
+    setShowKYCModal(false)
   }
   
   return (
@@ -409,7 +445,12 @@ export function TechnicianSettings() {
                 <Badge color="teal">Top Rated</Badge>
               </div>
               {kycConfig.action && (
-                <Button variant="outline" size="sm" className="mt-2" onClick={() => alert('KYC submission form - backend not implemented yet')}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2" 
+                  onClick={() => setShowKYCModal(true)}
+                >
                   {kycConfig.action}
                 </Button>
               )}
@@ -422,20 +463,23 @@ export function TechnicianSettings() {
 
         <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Premium Listing</h2>
         <div className="space-y-3 mb-6">
-          {plans.map(p => (
-            <div key={p.id} className={`p-4 rounded-2xl border-2 ${p.id === 'basic' ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900'}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-gray-900 dark:text-white">{p.name}</p>
-                  {p.popular && <Badge color="orange">Populer</Badge>}
-                  {p.id === 'basic' && <Badge color="teal">Aktif</Badge>}
+          {plans.map(p => {
+            const isActive = p.id === currentPlanId
+            return (
+              <div key={p.id} className={`p-4 rounded-2xl border-2 ${isActive ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900'}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-gray-900 dark:text-white">{p.name}</p>
+                    {p.popular && !isActive && <Badge color="orange">Populer</Badge>}
+                    {isActive && <Badge color="teal">Aktif</Badge>}
+                  </div>
+                  <span className="font-display font-700 text-gray-900 dark:text-white">Rp{p.price.toLocaleString('id')}<span className="text-xs text-gray-400 font-normal">/bln</span></span>
                 </div>
-                <span className="font-display font-700 text-gray-900 dark:text-white">Rp{p.price.toLocaleString('id')}<span className="text-xs text-gray-400 font-normal">/bln</span></span>
+                <p className="text-xs text-gray-500 mt-1">{p.desc}</p>
+                {!isActive && <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => handleUpgradeClick(p)}>Upgrade ke {p.name}</Button>}
               </div>
-              <p className="text-xs text-gray-500 mt-1">{p.desc}</p>
-              {p.id !== 'basic' && <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => handleUpgradeClick(p)}>Upgrade ke {p.name}</Button>}
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         <button onClick={() => navigate('/')} className="w-full flex items-center justify-center gap-2 py-3 text-sm text-red-500 font-medium">
@@ -445,9 +489,16 @@ export function TechnicianSettings() {
       <UpgradePremiumModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
-        currentPlan={plans[0]}
+        currentPlan={plans.find(p => p.id === currentPlanId) || plans[0]}
         newPlan={selectedPlan}
         onConfirm={handleUpgradeConfirm}
+      />
+      <KYCSubmissionModal
+        isOpen={showKYCModal}
+        onClose={() => setShowKYCModal(false)}
+        tech={tech}
+        onSubmit={handleKYCSubmit}
+        initialData={kycData}
       />
     </TechLayout>
   )

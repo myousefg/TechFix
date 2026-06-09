@@ -46,9 +46,13 @@ export function AdminAuditLog() {
 
   return (
     <AdminLayout>
-      <button onClick={() => navigate('/admin')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
-        <ArrowLeft size={16} /> Kembali
-      </button>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Dashboard
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Audit Log</span>
+      </div>
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-2">Audit Log</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Riwayat semua aktivitas admin di platform</p>
 

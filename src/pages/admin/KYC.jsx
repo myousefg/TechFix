@@ -14,9 +14,13 @@ export function AdminKYC() {
 
   return (
     <AdminLayout>
-      <button onClick={() => navigate("/admin")} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
-        <ArrowLeft size={16} /> Kembali
-      </button>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Dashboard
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Review KYC</span>
+      </div>
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-2">Review KYC Teknisi</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Verifikasi identitas teknisi sebelum mereka bisa menerima order</p>
 
@@ -126,9 +130,13 @@ export function AdminKYCDetail() {
 
   return (
     <AdminLayout>
-      <button onClick={() => navigate('/admin/kyc')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
-        <ArrowLeft size={16} /> Kembali ke Daftar KYC
-      </button>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin/kyc')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Review KYC
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Detail KYC</span>
+      </div>
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-2">Review KYC #{kyc.id}</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Diajukan {kyc.submitted}</p>
 

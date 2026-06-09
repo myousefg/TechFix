@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import { Home, Package, TrendingUp, Star, Settings, LogOut, CheckCircle, ChevronRight, ArrowLeft, Upload, Camera, DollarSign, Clock, Search } from 'lucide-react'
 import { Card, Badge, Button, Input, EscrowStatus, StatCard, EmptyState } from '../../components/UI'
 import { TechnicianOrderDetail } from '../../components/TechnicianOrderDetail'
-import { getOrders, updateOrder, saveSession, loadSession, removeSession, getTechnicianProfile, saveTechnicianProfile, getCurrentTechnicianId, getCurrentTechnician, getOrdersByTechId, getTechnicianEarnings, getKYCRequests, submitKYC, getSubscription, saveSubscription } from '../../store'
+import { getOrders, updateOrder, saveSession, loadSession, removeSession, getTechnicianProfile, saveTechnicianProfile, getCurrentTechnicianId, getCurrentTechnician, getOrdersByTechId, getTechnicianEarnings, getKYCRequests, submitKYC, getSubscription, saveSubscription, requestWithdrawal, load } from '../../store'
 import { WithdrawModal, UpgradePremiumModal, KYCSubmissionModal } from '../../components/TechnicianModals'
 
 function TechLayout({ children, activeTab }) {
@@ -326,11 +326,15 @@ export function TechnicianEarnings() {
 
   // Saldo: 90% dari total (10% komisi platform), minus sudah dicairkan sebelumnya (simulasi 60%)
   const saldoNetto = Math.round(earnings.total * 0.9)
-  const alreadyWithdrawn = Math.round(saldoNetto * 0.6)
+  const [withdrawnExtra, setWithdrawnExtra] = useState(0)
+  const baseWithdrawn = Math.round(saldoNetto * 0.6)
+  const alreadyWithdrawn = baseWithdrawn + withdrawnExtra
   const availableBalance = saldoNetto - alreadyWithdrawn
 
   function handleWithdraw({ amount, method, accountNumber }) {
-    toast.success(`Pencairan Rp${Number(amount).toLocaleString('id')} ke ${method} berhasil diajukan!`)
+    requestWithdrawal(tech.id, amount, method, accountNumber)
+    setWithdrawnExtra(prev => prev + Number(amount))
+    toast.success(`✅ Pencairan Rp${Number(amount).toLocaleString('id')} ke ${method} berhasil diajukan! Diproses 1–2 hari kerja.`)
     setShowWithdrawModal(false)
   }
   
@@ -405,7 +409,7 @@ export function TechnicianEarnings() {
       <WithdrawModal
         isOpen={showWithdrawModal}
         onClose={() => setShowWithdrawModal(false)}
-        balance={availableBalance}
+        balance={Math.max(availableBalance, 0)}
         onSubmit={handleWithdraw}
       />
     </TechLayout>
@@ -511,7 +515,14 @@ export function TechnicianSettings() {
                   <span className="font-display font-700 text-gray-900 dark:text-white">Rp{p.price.toLocaleString('id')}<span className="text-xs text-gray-400 font-normal">/bln</span></span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{p.desc}</p>
-                {!isActive && <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => handleUpgradeClick(p)}>Upgrade ke {p.name}</Button>}
+                {!isActive && p.id !== 'basic' && <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => handleUpgradeClick(p)}>Upgrade ke {p.name}</Button>}
+                {isActive && p.id !== 'basic' && (
+                  <Button variant="outline" size="sm" className="mt-3 w-full text-red-500 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20" onClick={() => {
+                    setCurrentPlanId('basic')
+                    saveSubscription({ id: 'basic', name: 'Basic', price: 50000 })
+                    toast.success('Paket dikembalikan ke Basic')
+                  }}>Batalkan & Kembali ke Basic</Button>
+                )}
               </div>
             )
           })}

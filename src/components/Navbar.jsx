@@ -108,7 +108,7 @@ export default function Navbar() {
   const activePortal = portals.find(p => location.pathname.startsWith(p.path))
 
   return (
-    <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? 'border-b border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-950/90 backdrop-blur-lg shadow-sm' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled || !dark ? 'border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/90 backdrop-blur-lg shadow-sm' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
@@ -116,7 +116,7 @@ export default function Navbar() {
           <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm group-hover:shadow-brand-500/40 group-hover:shadow-md">
             <Wrench size={15} className="text-white" />
           </div>
-          <span className={`font-display text-xl font-700 tracking-tight transition-colors ${scrolled || location.pathname !== '/' ? 'text-gray-900 dark:text-white' : 'text-white'}`}>
+          <span className={`font-display text-xl font-700 tracking-tight transition-colors ${scrolled || location.pathname !== '/' || !dark ? 'text-gray-900 dark:text-white' : 'text-white'}`}>
             Tech<span className="text-brand-500">Fix</span>
           </span>
         </Link>
@@ -124,14 +124,14 @@ export default function Navbar() {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-1">
           <Link to="/"
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/' ? 'text-brand-500' : scrolled || location.pathname !== '/' ? 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/' ? 'text-brand-500' : scrolled || location.pathname !== '/' || !dark ? 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
             Beranda
           </Link>
 
           {/* Portal dropdown */}
           <div className="relative">
             <button onClick={() => setPortalOpen(o => !o)}
-              className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${scrolled || location.pathname !== '/' ? 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+              className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${scrolled || location.pathname !== '/' || !dark ? 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
               {activePortal ? <span className={activePortal.color}>{activePortal.label}</span> : 'Portal'}
               <ChevronDown size={14} className={`transition-transform duration-200 ${portalOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -155,7 +155,7 @@ export default function Navbar() {
           </div>
 
           <Link to="/about"
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/about' ? 'text-brand-500' : scrolled || location.pathname !== '/' ? 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/about' ? 'text-brand-500' : scrolled || location.pathname !== '/' || !dark ? 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
             Tentang
           </Link>
         </div>
@@ -164,7 +164,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {location.pathname.startsWith('/customer') && <NotificationDropdown scrolled={scrolled} />}
           <button onClick={toggle}
-            className={`p-2 rounded-lg transition-colors ${scrolled || location.pathname !== '/' ? 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+            className={`p-2 rounded-lg transition-colors ${scrolled || location.pathname !== '/' || !dark ? 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
             {dark ? <Sun size={17} /> : <Moon size={17} />}
           </button>
           <Link to="/customer/register"
@@ -173,7 +173,7 @@ export default function Navbar() {
             <ArrowRight size={13} />
           </Link>
           <button onClick={() => setMobileOpen(o => !o)}
-            className={`md:hidden p-2 rounded-lg transition-colors ${scrolled || location.pathname !== '/' ? 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white hover:bg-white/10'}`}>
+            className={`md:hidden p-2 rounded-lg transition-colors ${scrolled || location.pathname !== '/' || !dark ? 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white hover:bg-white/10'}`}>
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>

@@ -51,9 +51,13 @@ export function AdminAdsPage() {
 
   return (
     <AdminLayout>
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
-        <ArrowLeft size={16} /> Kembali
-      </button>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin/ads')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Iklan & Partner
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Manajemen Campaign</span>
+      </div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white">Manajemen Campaign Iklan</h1>
@@ -166,9 +170,7 @@ function AdCampaignForm({ initial, partners, onClose, onSaved }) {
 
   return (
     <AdminLayout>
-      <button onClick={onClose} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
-        <ArrowLeft size={16} /> Kembali
-      </button>
+      <div className="flex items-center gap-2 text-sm mb-6"><button onClick={onClose} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Manajemen Campaign</button><span className="text-gray-300 dark:text-gray-600">/</span><span className="text-gray-700 dark:text-gray-300 font-medium">Form Campaign</span></div>
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">
         {isEdit ? 'Edit' : 'Buat'} Campaign Iklan
       </h1>

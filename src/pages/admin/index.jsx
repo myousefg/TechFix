@@ -15,7 +15,7 @@ export { AdminAuditLog } from './AuditLog'
 export function AdminLayout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   const links = [
     { icon: BarChart2,    label: 'Dashboard',            path: '/admin' },
@@ -52,10 +52,10 @@ export function AdminLayout({ children }) {
         </button>
       </aside>
 
-      {/* Mobile: hamburger button in top-left (below navbar) */}
+      {/* Mobile: hamburger button positioned in header row */}
       <button
         onClick={() => setSidebarOpen(o => !o)}
-        className="md:hidden fixed top-[64px] left-0 z-50 w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-900 border-b border-r border-gray-200 dark:border-gray-800"
+        className="md:hidden fixed top-0 left-0 z-[60] w-16 h-16 flex items-center justify-center"
         aria-label="Menu"
       >
         {sidebarOpen ? <X size={20} className="text-gray-700 dark:text-gray-300" /> : <Menu size={20} className="text-gray-700 dark:text-gray-300" />}
@@ -77,7 +77,7 @@ export function AdminLayout({ children }) {
         </div>
       )}
 
-      <main className="md:pl-56 px-4 md:px-6 py-6 max-w-7xl">
+      <main className="md:pl-56 px-4 md:px-6 py-6">
         {children}
       </main>
     </div>

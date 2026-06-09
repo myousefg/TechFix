@@ -84,18 +84,26 @@ export default function AdminTransactions() {
     if (!t) {
       return (
         <AdminLayout>
-          <button onClick={() => navigate('/admin/transactions')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
-            <ArrowLeft size={16} /> Kembali ke Transaksi
-          </button>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin/transactions')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Transaksi
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Detail Transaksi</span>
+      </div>
           <div className="text-center py-12 text-gray-400">Transaksi tidak ditemukan</div>
         </AdminLayout>
       )
     }
     return (
       <AdminLayout>
-        <button onClick={() => navigate('/admin/transactions')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
-          <ArrowLeft size={16} /> Kembali ke Transaksi
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin/transactions')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Transaksi
         </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Detail Transaksi</span>
+      </div>
         <h1 className="font-display text-xl font-700 text-gray-900 dark:text-white mb-6">Detail Transaksi {t.id}</h1>
         <div className="grid md:grid-cols-2 gap-4 max-w-2xl">
           <Card className="p-5">

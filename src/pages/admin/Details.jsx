@@ -34,7 +34,7 @@ function CustomerDetail() {
   if (!customer) {
     return (
       <AdminLayout>
-        <Button variant="ghost" onClick={() => navigate('/admin/users')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <div className="flex items-center gap-2 text-sm mb-6"><button onClick={() => navigate('/admin/users')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Pengguna</button></div>
         <Card className="p-8 mt-4 text-center"><p className="text-gray-500">Pelanggan tidak ditemukan</p></Card>
       </AdminLayout>
     )
@@ -52,11 +52,10 @@ function CustomerDetail() {
   ]
   return (
     <AdminLayout>
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate('/admin/users')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
-        <span className="text-gray-300">/</span>
-        <Link to="/admin/users" className="text-sm text-gray-500 hover:text-brand-500">Pengguna</Link>
+        <button onClick={() => navigate('/admin/users')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Pengguna</button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
         <span className="text-gray-300">/</span>
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{customer.name}</span>
       </div>
@@ -185,7 +184,7 @@ function TechnicianDetail() {
   if (!tech) {
     return (
       <AdminLayout>
-        <Button variant="ghost" onClick={() => navigate('/admin/users')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <div className="flex items-center gap-2 text-sm mb-6"><button onClick={() => navigate('/admin/users')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Pengguna</button></div>
         <Card className="p-8 mt-4 text-center"><p className="text-gray-500">Teknisi tidak ditemukan</p></Card>
       </AdminLayout>
     )
@@ -204,11 +203,10 @@ function TechnicianDetail() {
   ]
   return (
     <AdminLayout>
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate('/admin/users')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
-        <span className="text-gray-300">/</span>
-        <Link to="/admin/users" className="text-sm text-gray-500 hover:text-brand-500">Pengguna</Link>
+        <button onClick={() => navigate('/admin/users')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Pengguna</button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
         <span className="text-gray-300">/</span>
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{tech.name}</span>
       </div>
@@ -344,7 +342,7 @@ function CampaignDetail() {
   if (!campaign) {
     return (
       <AdminLayout>
-        <Button variant="ghost" onClick={() => navigate('/admin/ads/manage')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <div className="flex items-center gap-2 text-sm mb-6"><button onClick={() => navigate('/admin/ads/manage')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Campaign</button></div>
         <Card className="p-8 mt-4 text-center"><p className="text-gray-500">Kampanye tidak ditemukan</p></Card>
       </AdminLayout>
     )
@@ -355,11 +353,10 @@ function CampaignDetail() {
   const maxDaily = Math.max(...(campaign.dailyStats || []).map(d => d.impressions), 1)
   return (
     <AdminLayout>
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate('/admin/ads/manage')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
-        <span className="text-gray-300">/</span>
-        <Link to="/admin/ads/manage" className="text-sm text-gray-500 hover:text-brand-500">Kampanye</Link>
+        <button onClick={() => navigate('/admin/ads/manage')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Campaign</button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
         <span className="text-gray-300">/</span>
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{campaign.name}</span>
       </div>
@@ -415,7 +412,7 @@ function PartnerDetail() {
   if (!partner) {
     return (
       <AdminLayout>
-        <Button variant="ghost" onClick={() => navigate('/admin/ads')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
+        <div className="flex items-center gap-2 text-sm mb-6"><button onClick={() => navigate('/admin/ads')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Iklan & Partner</button></div>
         <Card className="p-8 mt-4 text-center"><p className="text-gray-500">Partner tidak ditemukan</p></Card>
       </AdminLayout>
     )
@@ -424,11 +421,10 @@ function PartnerDetail() {
   const totalRevenue = campaigns.reduce((s, c) => s + (c.spend || 0), 0)
   return (
     <AdminLayout>
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate('/admin/ads')}><ArrowLeft size={16} className="mr-1" />Kembali</Button>
-        <span className="text-gray-300">/</span>
-        <Link to="/admin/ads" className="text-sm text-gray-500 hover:text-brand-500">Iklan & Partner</Link>
+        <button onClick={() => navigate('/admin/ads')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Iklan & Partner</button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
         <span className="text-gray-300">/</span>
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{partner.name}</span>
       </div>
@@ -512,11 +508,11 @@ function ReviewsModeration() {
   }
   return (
     <AdminLayout>
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate('/admin')}><ArrowLeft size={16} className="mr-1" />Dashboard</Button>
-        <span className="text-gray-300">/</span>
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Moderasi Review</span>
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Dashboard</button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="font-medium text-gray-700 dark:text-gray-300">Moderasi Review</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <Card className="p-4 cursor-pointer hover:border-brand-500" onClick={() => setFilter('pending')}><p className="text-xs text-gray-500">Pending</p><p className="text-xl font-display font-700 text-yellow-600 mt-1">{counts.pending}</p></Card>
@@ -596,11 +592,11 @@ function SupportTickets() {
   }
   return (
     <AdminLayout>
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" onClick={() => navigate('/admin')}><ArrowLeft size={16} className="mr-1" />Dashboard</Button>
-        <span className="text-gray-300">/</span>
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Support Tickets</span>
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"><ArrowLeft size={15} />Dashboard</button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="font-medium text-gray-700 dark:text-gray-300">Support Tickets</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <Card className="p-4"><p className="text-xs text-gray-500">Open</p><p className="text-xl font-display font-700 text-yellow-600 mt-1">{counts.open}</p></Card>

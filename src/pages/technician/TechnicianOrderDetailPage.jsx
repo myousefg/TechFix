@@ -136,17 +136,12 @@ export function TechnicianOrderDetailPage() {
               {order.status === 'progress' && (
                 isServiceCompleted ? (
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Servis selesai, siap diambil. Menunggu konfirmasi pelanggan.
+                    ✅ Servis selesai, siap diambil. Menunggu konfirmasi pelanggan.
                   </p>
                 ) : (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button className="flex-1" onClick={() => { setJobStatusAction('start'); setShowJobStatusModal(true) }}>
-                      Update Progres
-                    </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => { setJobStatusAction('complete'); setShowJobStatusModal(true) }}>
-                      Selesai Servis
-                    </Button>
-                  </div>
+                  <Button variant="outline" className="w-full" onClick={() => { setJobStatusAction('complete'); setShowJobStatusModal(true) }}>
+                    Tandai Selesai Servis
+                  </Button>
                 )
               )}
             </Card>
@@ -154,7 +149,7 @@ export function TechnicianOrderDetailPage() {
 
           {order.status === 'progress' && !isServiceCompleted && !updateSent && (
             <Card className="p-5 mb-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Kirim Update Progres</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Update Progres ke Pelanggan</h3>
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>

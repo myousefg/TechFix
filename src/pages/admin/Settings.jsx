@@ -48,9 +48,13 @@ export function AdminSettings() {
 
   return (
     <AdminLayout>
-      <button onClick={() => navigate('/admin')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
-        <ArrowLeft size={16} /> Kembali
-      </button>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Dashboard
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Pengaturan</span>
+      </div>
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Pengaturan Admin</h1>
 
       <div className="space-y-4 max-w-2xl">
@@ -124,9 +128,9 @@ export function AdminSettings() {
                 </div>
                 <button
                   onClick={() => setNotif({ ...notif, [item.key]: !notif[item.key] })}
-                  className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0 ${notif[item.key] ? 'bg-brand-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                  className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 outline-none ${notif[item.key] ? 'bg-brand-500' : 'bg-gray-300 dark:bg-gray-600'}`}
                 >
-                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${notif[item.key] ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${notif[item.key] ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
               </div>
             ))}

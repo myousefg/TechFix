@@ -16,9 +16,9 @@ export function Badge({ children, color = 'blue' }) {
   )
 }
 
-export function Card({ children, className = '', hover = false }) {
+export function Card({ children, className = '', hover = false, ...rest }) {
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 transition-all duration-200 ${hover ? 'hover:shadow-lg hover:shadow-brand-500/5 hover:border-brand-200 dark:hover:border-brand-800 cursor-pointer hover:-translate-y-0.5' : ''} ${className}`}>
+    <div {...rest} className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 transition-all duration-200 ${hover ? 'hover:shadow-lg hover:shadow-brand-500/5 hover:border-brand-200 dark:hover:border-brand-800 cursor-pointer hover:-translate-y-0.5' : ''} ${className}`}>
       {children}
     </div>
   )

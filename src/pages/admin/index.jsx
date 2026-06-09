@@ -5,7 +5,7 @@ import { Card, Badge, Button, StatCard, SidebarLink, EmptyState } from '../../co
 import { TopTechsLeaderboard, ActivityFeed } from './Modals'
 import { technicians } from '../../data'
 import { getAdminTransactions, getAdminProfile, getCustomers, getCustomerOrders, getKYCRequests, getPartners, getDisputes, getDisputeById, resolveDispute, updateKYCStatus, addAuditLog, getRevenueHistory } from '../../store'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 
 export { AdminAdsPage } from './Ads'
 export { AdminKYC, AdminKYCDetail } from './KYC'
@@ -37,7 +37,6 @@ export function AdminLayout({ children }) {
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
-      <Toaster position="top-right" />
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col fixed left-0 top-16 bottom-0 w-56 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-4 z-30">
@@ -77,8 +76,10 @@ export function AdminLayout({ children }) {
         </div>
       )}
 
-      <main className="md:pl-56 px-4 md:px-6 py-6">
+      <main className="md:pl-56">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-6">
         {children}
+      </div>
       </main>
     </div>
   )
@@ -412,6 +413,13 @@ export function AdminUsers() {
 
   return (
     <AdminLayout>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Dashboard
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Manajemen Pengguna</span>
+      </div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white">Manajemen Pengguna</h1>
         <Link to="/admin/kyc" className="text-sm text-brand-500 hover:underline flex items-center gap-1">
@@ -553,6 +561,13 @@ export function AdminDisputes() {
 
   return (
     <AdminLayout>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Dashboard
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Arbitrase Sengketa</span>
+      </div>
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-2">Arbitrase Sengketa</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Sengketa yang menunggu keputusan arbitrase admin</p>
       <div className="space-y-3">
@@ -586,9 +601,13 @@ function DisputeDetail({ id, onBack }) {
   if (!d) {
     return (
       <AdminLayout>
-        <button onClick={onBack} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-4">
-          <ArrowLeft size={16} /> Kembali
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin/disputes')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Arbitrase Sengketa
         </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Detail Sengketa</span>
+      </div>
         <EmptyState icon={AlertTriangle} title="Sengketa tidak ditemukan" desc="ID sengketa tidak valid" />
       </AdminLayout>
     )
@@ -604,9 +623,13 @@ function DisputeDetail({ id, onBack }) {
 
   return (
     <AdminLayout>
-      <button onClick={() => navigate('/admin/disputes')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
-        <ArrowLeft size={16} /> Kembali ke Daftar Sengketa
-      </button>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin/disputes')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Arbitrase Sengketa
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Detail Sengketa</span>
+      </div>
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-2">Sengketa {d.id}</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Order {d.order} • Dibuka {d.openedAt}</p>
 
@@ -665,6 +688,13 @@ export function AdminAds() {
 
   return (
     <AdminLayout>
+      <div className="flex items-center gap-2 text-sm mb-6">
+        <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors font-medium">
+          <ArrowLeft size={15} />Dashboard
+        </button>
+        <span className="text-gray-300 dark:text-gray-600">/</span>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Iklan & Partnership</span>
+      </div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white">Iklan & Partnership</h1>

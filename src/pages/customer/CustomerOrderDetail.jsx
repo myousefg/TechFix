@@ -51,7 +51,7 @@ export function CustomerOrderDetail() {
   return (
     <CustomerLayout activeTab="orders">
       <div className="py-6">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-4">
+        <button onClick={() => navigate('/customer/orders')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-4">
           <ArrowLeft size={16} />Kembali
         </button>
         <h1 className="font-display text-xl font-700 text-gray-900 dark:text-white mb-4">Detail Pesanan</h1>

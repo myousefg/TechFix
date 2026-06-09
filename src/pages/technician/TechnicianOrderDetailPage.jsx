@@ -114,7 +114,7 @@ export function TechnicianOrderDetailPage() {
               setUpdateSent(false); 
               setProgressStatus('Diagnosa awal selesai'); 
               setProgressNotes(''); 
-              navigate(-1); 
+              navigate('/technician/orders');
             }}
           />
 

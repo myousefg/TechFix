@@ -41,7 +41,7 @@ export default function Dispute() {
   return (
     <div className="pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 pb-10">
       <div className="max-w-xl mx-auto px-4 py-6">
-        <button onClick={() => navigate(-1)}
+        <button onClick={() => navigate('/customer/orders')}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors">
           <ArrowLeft size={16} /> Kembali
         </button>

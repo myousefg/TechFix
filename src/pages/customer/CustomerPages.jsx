@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Bell, Star, Heart } from 'lucide-react'
 import { Card, Badge, Button, EmptyState, StarRating } from '../../components/UI'
 import { getCurrentCustomer, getNotifications, markNotifsRead, getReviews } from '../../store'
+import { CustomerLayout } from './index'
 
 // ── CUSTOMER NOTIFICATIONS ──────────────────────────────────────
 export function CustomerNotifications() {
@@ -17,6 +18,7 @@ export function CustomerNotifications() {
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
+    <CustomerLayout activeTab="settings">
     <div className="py-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white">Notifikasi</h1>
@@ -58,12 +60,14 @@ export function CustomerNotifications() {
         })}
       </div>
     </div>
+    </CustomerLayout>
   )
 }
 
 // ── CUSTOMER FAVORITES ──────────────────────────────────────────
 export function CustomerFavorites() {
   return (
+    <CustomerLayout activeTab="settings">
     <div className="py-6">
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Teknisi Favorit</h1>
       <EmptyState 
@@ -72,6 +76,7 @@ export function CustomerFavorites() {
         desc="Segera kamu bisa menyimpan teknisi favoritmu di sini" 
       />
     </div>
+    </CustomerLayout>
   )
 }
 
@@ -82,6 +87,7 @@ export function CustomerReviews() {
   const myReviews = allReviews.filter(r => r.customerId === customer.id)
 
   return (
+    <CustomerLayout activeTab="settings">
     <div className="py-6">
       <h1 className="font-display text-2xl font-700 text-gray-900 dark:text-white mb-6">Ulasan Saya</h1>
       
@@ -120,5 +126,6 @@ export function CustomerReviews() {
         ))}
       </div>
     </div>
+    </CustomerLayout>
   )
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Toaster } from 'react-hot-toast'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { ThemeProvider } from './ThemeContext'
 import Navbar from './components/Navbar'
@@ -11,6 +12,7 @@ import {
   Booking, CustomerOrders, CustomerSubscription, CustomerSettings
 } from './pages/customer'
 import AccountSettings from './pages/customer/AccountSettings'
+import B2BRegister from './pages/customer/B2BRegister'
 import { CustomerOrderDetail } from './pages/customer/CustomerOrderDetail'
 import { CustomerNotifications, CustomerFavorites, CustomerReviews } from './pages/customer/CustomerPages'
 
@@ -34,6 +36,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <Toaster position="top-right" toastOptions={{ duration: 3500 }} />
         <AppContent />
       </BrowserRouter>
     </ThemeProvider>
@@ -62,6 +65,7 @@ function AppContent() {
         <Route path="/customer/subscription"       element={<CustomerSubscription />} />
         <Route path="/customer/settings"           element={<CustomerSettings />} />
         <Route path="/customer/account"            element={<AccountSettings />} />
+        <Route path="/customer/b2b-register"        element={<B2BRegister />} />
         <Route path="/customer/notifications"      element={<CustomerNotifications />} />
         <Route path="/customer/favorites"          element={<CustomerFavorites />} />
         <Route path="/customer/reviews"            element={<CustomerReviews />} />
@@ -74,7 +78,6 @@ function AppContent() {
         <Route path="/technician/earnings"  element={<TechnicianEarnings />} />
         <Route path="/technician/reviews"   element={<TechnicianReviews />} />
         <Route path="/technician/subscription" element={<TechnicianSubscriptionHistory />} />
-        <Route path="/technician/settings"  element={<TechnicianSettings />} />
         <Route path="/technician/settings"  element={<TechnicianSettings />} />
 
         {/* Admin */}

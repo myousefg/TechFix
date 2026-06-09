@@ -1,6 +1,31 @@
 // ── Simple localStorage store ──────────────────────────────────
 const PREFIX = 'techfix_'
 
+// ── Data version migration ─────────────────────────────────────
+// Bump DATA_VERSION whenever data.js changes significantly.
+// On version mismatch, localStorage orders/reviews/customers are reset to data.js defaults.
+const DATA_VERSION = '2.0.0'
+
+function runMigrationIfNeeded() {
+  try {
+    const stored = localStorage.getItem(PREFIX + 'data_version')
+    if (stored !== DATA_VERSION) {
+      // Clear all data keys so fresh seed from data.js takes effect
+      const keysToReset = ['orders', 'reviews', 'customers', 'kyc_requests', 'disputes',
+        'revenue_history', 'audit_log', 'support_tickets', 'ad_campaigns', 'partners',
+        'loyalty_points', 'customer_disputes', 'withdrawals']
+      keysToReset.forEach(k => {
+        try { localStorage.removeItem(PREFIX + k) } catch {}
+      })
+      localStorage.setItem(PREFIX + 'data_version', DATA_VERSION)
+    }
+  } catch {}
+}
+
+// Run immediately when module loads
+runMigrationIfNeeded()
+
+
 export function save(key, value) {
   try { localStorage.setItem(PREFIX + key, JSON.stringify(value)) } catch {}
 }
@@ -370,11 +395,23 @@ export function addAuditLog(entry) {
 
 export function getRevenueHistory() {
   return load('revenue_history', null) || [
-    { month: 'Jan', commission: 1800000, subscription: 2200000, ads: 1200000 },
-    { month: 'Feb', commission: 2100000, subscription: 2400000, ads: 1300000 },
-    { month: 'Mar', commission: 1950000, subscription: 2500000, ads: 1400000 },
-    { month: 'Apr', commission: 2400000, subscription: 2500000, ads: 1350000 },
-    { month: 'Mei', commission: 2750000, subscription: 2500000, ads: 1500000 },
+    { month: 'Jan', commission: 800000,  subscription: 500000,  ads: 0 },
+    { month: 'Feb', commission: 1200000, subscription: 750000,  ads: 200000 },
+    { month: 'Mar', commission: 1500000, subscription: 1000000, ads: 350000 },
+    { month: 'Apr', commission: 1800000, subscription: 1200000, ads: 500000 },
+    { month: 'Mei', commission: 2100000, subscription: 1500000, ads: 700000 },
+    { month: 'Jun', commission: 2400000, subscription: 1800000, ads: 900000 },
+    { month: 'Jul', commission: 2800000, subscription: 2000000, ads: 1000000 },
+    { month: 'Agu', commission: 3200000, subscription: 2100000, ads: 1100000 },
+    { month: 'Sep', commission: 3600000, subscription: 2200000, ads: 1200000 },
+    { month: 'Okt', commission: 4000000, subscription: 2300000, ads: 1300000 },
+    { month: 'Nov', commission: 4500000, subscription: 2400000, ads: 1400000 },
+    { month: 'Des', commission: 5000000, subscription: 2500000, ads: 1500000 },
+    { month: 'Jan 26', commission: 5200000, subscription: 2500000, ads: 1500000 },
+    { month: 'Feb 26', commission: 5400000, subscription: 2500000, ads: 1400000 },
+    { month: 'Mar 26', commission: 5600000, subscription: 2500000, ads: 1450000 },
+    { month: 'Apr 26', commission: 5800000, subscription: 2500000, ads: 1500000 },
+    { month: 'Mei 26', commission: 6000000, subscription: 2500000, ads: 1500000 },
   ]
 }
 
@@ -615,4 +652,36 @@ export function requestWithdrawal(techId, amount, method, accountNumber) {
   withdrawals.push(newWithdrawal)
   save('withdrawals', withdrawals)
   return newWithdrawal
+}
+
+// ── CUSTOMER DISPUTES ──────────────────────────────────────────
+export function getCustomerDisputes() {
+  return load('customer_disputes', [])
+}
+export function addCustomerDispute(dispute) {
+  const list = getCustomerDisputes()
+  list.unshift(dispute)
+  save('customer_disputes', list)
+  return list
+}
+
+// ── LOYALTY POINTS ─────────────────────────────────────────────
+export function getLoyaltyPoints() {
+  return load('loyalty_points', {
+    points: 320,
+    tier: 'Silver',
+    history: [
+      { id: 1, desc: 'Order TF-001 selesai',    pts: +50,  date: '20 Mei 2026' },
+      { id: 2, desc: 'Order TF-005 selesai',    pts: +30,  date: '10 Mei 2026' },
+      { id: 3, desc: 'Redeem Diskon Rp20.000',  pts: -50,  date: '5 Mei 2026'  },
+      { id: 4, desc: 'Order TF-004 selesai',    pts: +50,  date: '15 Mei 2026' },
+      { id: 5, desc: 'Bonus registrasi',        pts: +100, date: '15 Jan 2026' },
+      { id: 6, desc: 'Order TF-007 selesai',    pts: +40,  date: '5 Mei 2026'  },
+      { id: 7, desc: 'Order TF-010 selesai',    pts: +30,  date: '22 Mei 2026' },
+      { id: 8, desc: 'Referral bonus',          pts: +70,  date: '20 Feb 2026' },
+    ]
+  })
+}
+export function saveLoyaltyPoints(data) {
+  save('loyalty_points', data)
 }

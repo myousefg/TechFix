@@ -5,6 +5,7 @@ import { Search, MapPin, Shield, ArrowLeft, CheckCircle, Upload, CreditCard, Che
 import { Card, Badge, StarRating, TechnicianCard, Button, Input, EscrowStatus, EmptyState } from '../../components/UI'
 import { technicians, services, maintenancePlans } from '../../data'
 import { getSubscription, saveSubscription, getOrders, addOrder, updateOrder, getAccountSettings, getNotifications, markNotifsRead, saveSession, loadSession, removeSession, remove, calculateDistance, getUserLocation, getCurrentCustomer, getOrdersByCustomerId } from '../../store'
+import { PaymentConfirmationModal } from '../../components/CustomerModals'
 
 function CustomerLayout({ children, activeTab }) {
   const navigate = useNavigate()
@@ -349,6 +350,8 @@ export function Booking() {
   const [schedule, setSchedule] = useState(persisted.schedule)
   const [selectedPayment, setSelectedPayment] = useState(persisted.selectedPayment)
   const [orderId, setOrderId] = useState(null)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false)
 
   useEffect(() => {
     saveSession('booking_form', { selectedService, device, description, schedule, selectedPayment })
@@ -366,15 +369,7 @@ export function Booking() {
     setStep(n)
   }
 
-  function handleConfirm() {
-    if (!device || !description || !schedule) {
-      toast.error('Lengkapi data servis terlebih dahulu')
-      return
-    }
-    if (!selectedPayment) {
-      toast.error('Pilih metode pembayaran terlebih dahulu')
-      return
-    }
+  function handlePaymentConfirm() {
     const existing = getOrders()
     const newId = 'TF-' + String(existing.length + 1).padStart(3, '0')
     const me = getCurrentCustomer()
@@ -391,6 +386,8 @@ export function Booking() {
       escrow: 'waiting',
     })
     setOrderId(newId)
+    setPaymentConfirmed(true)
+    setShowPaymentModal(false)
     removeSession('booking_form')
     setStep(3)
   }
@@ -430,6 +427,11 @@ export function Booking() {
                 </div>
               </div>
               <Input label="Jadwal Servis" type="date" value={schedule} onChange={e => setSchedule(e.target.value)} />
+              <div className="bg-brand-50 dark:bg-brand-900/20 rounded-xl p-4 border border-brand-100 dark:border-brand-800">
+                <p className="text-xs text-brand-600 dark:text-brand-400 mb-1">Estimasi Biaya</p>
+                <p className="font-display text-2xl font-700 text-gray-900 dark:text-white">Rp{tech.price.toLocaleString('id')}</p>
+                <p className="text-xs text-gray-500 mt-1">Harga bisa berubah sesuai kompleksitas masalah</p>
+              </div>
             </div>
             <Button className="w-full mt-6" onClick={() => goToStep(2)}>Lanjut ke Pembayaran</Button>
           </Card>
@@ -463,7 +465,19 @@ export function Booking() {
                 </label>
               ))}
             </div>
-            <Button className="w-full" onClick={handleConfirm} disabled={!selectedPayment}>Bayar & Konfirmasi Pesanan</Button>
+            <Button className="w-full" onClick={() => setShowPaymentModal(true)} disabled={!selectedPayment}>Bayar & Konfirmasi Pesanan</Button>
+            <PaymentConfirmationModal
+              isOpen={showPaymentModal}
+              onClose={() => setShowPaymentModal(false)}
+              order={{
+                id: 'PREVIEW',
+                service: selectedService,
+                tech: tech.name,
+                amount: tech.price,
+              }}
+              method={selectedPayment}
+              onConfirm={handlePaymentConfirm}
+            />
           </Card>
         )}
 
